@@ -81,7 +81,6 @@ class MainFragment : Fragment() {
 
 
     // TODO(НУЖНО СДЕЛАТЬ ОБНУЛЕНИЕ СЧЕТЧИКОВ В УКАЗАННЫЙ ДЕНЬ!!!)
-    // TODO( + ПЕРЕСЧИТЫВАТЬ СБЕРЕЖЕНИЯ ЗА ПРОШЛЫЙ МЕСЯЦ!!!)
 
     override fun onStart() {
         super.onStart()
@@ -246,7 +245,8 @@ class MainFragment : Fragment() {
             val textTime = "Время: ${timeFormat.format(calendar.time)}"
             customDialog.enterData.text = "$textDate        $textTime"
 
-            val dateFormatForReturn = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            val dateFormatForReturn = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            calendar.set(Calendar.SECOND, 0)
             var dataTimeSelected = calendar
 
             customDialog.enterData.setOnClickListener {
@@ -308,6 +308,30 @@ class MainFragment : Fragment() {
 
                                 // ДОБАВЛЯЕТ ЗАПСИСЬ В БД
                                 Thread { db.getDao().insertItem(item) }.start()
+
+                                // ОБНОВЛЯЕТ ДАННЫЕ О СБЕРЕЖЕНИЯХ В БД
+                                Thread{
+
+                                    val textDateForUpdate = calcDate(Calendar.getInstance())    // формируется ключ
+
+                                    val pastTotal = when (db.getDao().getBudgetData(textDateForUpdate)) {
+                                        null -> 0
+                                        else -> db.getDao().getBudgetData(textDateForUpdate)
+                                    }
+
+                                    val resultTotalBalance = pref.getInt(R.drawable.credit_card_white.toString(), 0) +
+                                            pref.getInt(R.drawable.wallet_white.toString(), 0) +
+                                            pref.getInt(R.drawable.account_balance_white.toString(), 0)
+
+                                    val spend = Spends(
+                                        textDateForUpdate,
+                                        resultTotalBalance,
+                                        pastTotal!!
+                                    )
+                                    Thread{
+                                        db.getDao().insertSpend(spend)
+                                    }.start()
+                                }.start()
 
                                 dialog.dismiss()
 
@@ -415,6 +439,7 @@ class MainFragment : Fragment() {
                         val textDate = "Дата: ${dateFormat.format(selectedDate.time)}"
                         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                         val textTime = "Время: ${timeFormat.format(selectedDate.time)}"
+                        selectedDate.set(Calendar.SECOND, 0)
                         customDialog.enterData.text = "$textDate        $textTime"
                     },
                     calendar.get(Calendar.HOUR_OF_DAY),
@@ -535,9 +560,13 @@ class MainFragment : Fragment() {
                             else -> db.getDao().getBudgetData(textDate)
                         }
 
+                        val resultTotalBalance = pref.getInt(R.drawable.credit_card_white.toString(), 0) +
+                                pref.getInt(R.drawable.wallet_white.toString(), 0) +
+                                pref.getInt(R.drawable.account_balance_white.toString(), 0)
+
                         val spend = Spends(
                             textDate,
-                            pref.getInt("savingMax", 0),
+                            resultTotalBalance,
                             pastTotal!! + Integer.parseInt(res)
                         )
                         Thread{
