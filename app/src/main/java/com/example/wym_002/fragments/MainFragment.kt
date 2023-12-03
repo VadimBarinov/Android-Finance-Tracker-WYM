@@ -457,6 +457,7 @@ class MainFragment : Fragment() {
         )
 
         hidingPanel(datePickerDialog)
+        datePickerDialog.datePicker.maxDate = Calendar.getInstance().timeInMillis
         datePickerDialog.show()
 
         return selectedDate
@@ -606,7 +607,10 @@ class MainFragment : Fragment() {
         when ((pref.getInt(getString(R.string.setDateDay), 0) + 1) <= calendar.get(Calendar.DAY_OF_MONTH)){
             true -> {
                 calendar.set(Calendar.DAY_OF_MONTH, 1)
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
                 return dateFormat.format(calendar.time)
             }
@@ -620,7 +624,10 @@ class MainFragment : Fragment() {
                 calendar.set(Calendar.MONTH, month)
                 calendar.set(Calendar.YEAR, year)
                 calendar.set(Calendar.DAY_OF_MONTH, 1)
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
                 return dateFormat.format(calendar.time)
             }
