@@ -21,6 +21,7 @@
     <string name="keyTotalBalance">total</string>
     <string name="flagSplashScreen">flagSplashScreen</string>
     <string name="setDateDay">setDateDay</string>
+    <string name="deleteDateLast">deleteDateLast</string>
 
     <string name="myInfo">Данное приложение создал\nстудент 2 курса Ульяновского\nгосударственного университета\nфакультета математики,\nинформационных и авиационных\nтехнологий группы МОАИС-О-22/1\nБаринов Вадим</string>
 </resources>

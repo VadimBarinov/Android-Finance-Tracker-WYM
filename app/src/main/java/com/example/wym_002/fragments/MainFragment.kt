@@ -2,13 +2,8 @@ package com.example.wym_002.fragments
 
 
 import android.annotation.SuppressLint
-import android.app.DatePickerDialog
-import android.app.Dialog
-import android.app.TimePickerDialog
-import android.content.ClipData
-import android.content.ClipDescription
-import android.content.Context
-import android.content.SharedPreferences
+import android.app.*
+import android.content.*
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point
@@ -71,22 +66,53 @@ class MainFragment : Fragment() {
         // checkSplashScreen        key: getString(R.string.flagSplashScreen)      ОБРАТНЫЕ ПЕРЕМЕННЫЕ
         //                                                                        0 == TRUE   1 == FALSE
         // setDateDay               key: getString(R.string.setDateDay)
+        //
+        // deleteDateLast                   key: getString(R.string.deleteDateLast)
 
         attachViewDragListenerAllIems()
 
         draggingElements()
 
+        checkDateDeletePref()
+
         return binding.root
     }
-
-
-    // TODO(НУЖНО СДЕЛАТЬ ОБНУЛЕНИЕ СЧЕТЧИКОВ В УКАЗАННЫЙ ДЕНЬ!!!)
 
     override fun onStart() {
         super.onStart()
         updatingVariables()         // чтобы каждый раз не считалось
     }
 
+    private fun checkDateDeletePref(){
+
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val lastDate = pref.getString(getString(R.string.deleteDateLast), "")
+
+        if ((calendar.get(Calendar.DAY_OF_MONTH) == pref.getInt(getString(R.string.setDateDay), 0) + 1) &&
+            (dateFormat.format(calendar.time) != lastDate)){
+
+            saveData(R.drawable.credit_card_white.toString(), 0)
+            saveData(R.drawable.wallet_white.toString(), 0)
+            saveData(R.drawable.account_balance_white.toString(), 0)
+
+            saveData("mainProgress", 0)
+            saveData("mainMax", 0)
+            saveData("mainColor", R.drawable.custom_progress_bar)
+
+            saveData("secondProgress", 0)
+            saveData("secondMax", 0)
+            saveData("secondColor", R.drawable.custom_progress_bar)
+
+            saveData("savingProgress", 0)
+            saveData("savingMax", 0)
+            saveData("savingColor", R.drawable.custom_progress_bar2)
+
+            saveData(getString(R.string.deleteDateLast), dateFormat.format(calendar.time))
+
+        }
+
+    }
 
 
     private fun attachViewDragListenerAllIems() {
@@ -153,16 +179,19 @@ class MainFragment : Fragment() {
         animSaving.duration = 500
 
         binding.mainPr.text = pref.getInt("mainMax", 0).toString()
+        binding.mainPr2.text = pref.getInt("mainProgress", 0).toString()
         binding.progressBarMain.max = pref.getInt("mainMax", 0)
         binding.progressBarMain.startAnimation(animMain)
         binding.progressBarMain.progress = pref.getInt("mainProgress", 0)
 
         binding.secondaryPr.text = pref.getInt("secondMax", 0).toString()
+        binding.secondaryPr2.text = pref.getInt("secondProgress", 0).toString()
         binding.progressBarSecondary.max = pref.getInt("secondMax", 0)
         binding.progressBarSecondary.startAnimation(animSecond)
         binding.progressBarSecondary.progress = pref.getInt("secondProgress", 0)
 
-        binding.spendPr.text = pref.getInt("savingProgress", 0).toString()
+        binding.spendPr.text = pref.getInt("savingMax", 0).toString()
+        binding.spendPr2.text = pref.getInt("savingProgress", 0).toString()
         binding.progressBarSaving.max = pref.getInt("savingMax", 0)
         binding.progressBarSaving.startAnimation(animSaving)
         binding.progressBarSaving.progress = pref.getInt("savingProgress", 0)
@@ -237,6 +266,7 @@ class MainFragment : Fragment() {
             dialog.setCancelable(true)
 
             val calendar = Calendar.getInstance()
+            calendar.set(Calendar.SECOND, 0)
 
             // указывается дата по умолчанию
             val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
@@ -246,7 +276,6 @@ class MainFragment : Fragment() {
             customDialog.enterData.text = "$textDate        $textTime"
 
             val dateFormatForReturn = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            calendar.set(Calendar.SECOND, 0)
             var dataTimeSelected = calendar
 
             customDialog.enterData.setOnClickListener {
@@ -276,9 +305,8 @@ class MainFragment : Fragment() {
                                 val dataTimeSelectedString = dateFormatForReturn.format(dataTimeSelected.time)
 
                                 // проверка на добавление траты за другой месяц
-                                if (calcDate(dataTimeSelected) == calcDate(calendar)) {
-                                    val dataToSave =
-                                        Integer.parseInt(balance.text.toString()) - Integer.parseInt(res)
+                                if (calcDate(dataTimeSelected) == calcDate(Calendar.getInstance())) {
+                                    val dataToSave = Integer.parseInt(balance.text.toString()) - Integer.parseInt(res)
                                     // пересчитывает баланс на картах
                                     saveData(drawableIconKey.toString(), dataToSave)
 
@@ -599,10 +627,19 @@ class MainFragment : Fragment() {
 
     }
 
+    @SuppressLint("CommitPrefEdits")
+    private fun saveData(key: String, dataToSave: String) {
+
+        val editor = pref.edit()
+        editor?.putString(key, dataToSave)
+        editor?.apply()
+
+    }
+
     private fun calcDate(calendar: Calendar): String{
 
         // ЕСЛИ ДАТА БОЛЬШЕ ИЛИ РАВНА ДАТЕ НАЧАЛА УЧЕТА, ТО БЮДЖЕТ ДОБАВЛЯЕТСЯ В ПЕРВЫЙ ДЕНЬ ТЕКУЩЕГО МЕСЯЦА
-        // ЕСЛИ ЖЕ ДАТА МИНЬШЕ, ТО БЮДЖЕТ ДОБАВЛЯЕСЯ В ПЕРВОЕ ЧИСЛО ПРОШЛОГО МЕСЯЦА
+        // ЕСЛИ ЖЕ ДАТА МЕНЬШЕ, ТО БЮДЖЕТ ДОБАВЛЯЕСЯ В ПЕРВОЕ ЧИСЛО ПРОШЛОГО МЕСЯЦА
 
         when ((pref.getInt(getString(R.string.setDateDay), 0) + 1) <= calendar.get(Calendar.DAY_OF_MONTH)){
             true -> {
