@@ -12,4 +12,13 @@
     <color name="backSelected">#555555</color>
     <color name="redHolo">#B50000</color>
     <color name="greyWYM">#828282</color>
+
+    <color name="house">#73CE00</color>
+    <color name="bus">#4B8600</color>
+    <color name="food_house">#FFD200</color>
+    <color name="health">#9E8200</color>
+    <color name="coffee">#FF7A00</color>
+    <color name="games">#9E4C00</color>
+    <color name="clothes">#FF0000</color>
+    <color name="another">#960000</color>
 </resources>

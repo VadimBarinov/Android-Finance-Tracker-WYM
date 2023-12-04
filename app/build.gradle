@@ -37,6 +37,13 @@ android {
 }
 
 dependencies {
+    // For Card view
+    implementation 'androidx.cardview:cardview:1.0.0'
+
+    // Chart and graph library
+    implementation 'com.github.blackfizz:eazegraph:1.2.5l@aar'
+    implementation 'com.nineoldandroids:library:2.4.0'
+
     implementation 'androidx.room:room-ktx:2.6.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
     implementation 'androidx.core:core-ktx:1.12.0'
