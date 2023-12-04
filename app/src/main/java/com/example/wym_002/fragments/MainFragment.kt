@@ -639,7 +639,22 @@ class MainFragment : Fragment() {
         // ЕСЛИ ДАТА БОЛЬШЕ ИЛИ РАВНА ДАТЕ НАЧАЛА УЧЕТА, ТО БЮДЖЕТ ДОБАВЛЯЕТСЯ В ПЕРВЫЙ ДЕНЬ ТЕКУЩЕГО МЕСЯЦА
         // ЕСЛИ ЖЕ ДАТА МЕНЬШЕ, ТО БЮДЖЕТ ДОБАВЛЯЕСЯ В ПЕРВОЕ ЧИСЛО ПРОШЛОГО МЕСЯЦА
 
-        when ((pref.getInt(getString(R.string.setDateDay), 0) + 1) <= calendar.get(Calendar.DAY_OF_MONTH)){
+        val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
+            true -> {
+                arrayOf(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+            else ->{
+                arrayOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+        }
+
+        val setDateDayTemp = when (arrayOfMonths[calendar.get(Calendar.MONTH) - 1] <
+                (pref.getInt(getString(R.string.setDateDay), 0) + 1)){
+            true -> arrayOfMonths[calendar.get(Calendar.MONTH) - 1]
+            else -> (pref.getInt(getString(R.string.setDateDay), 0) + 1)
+        }
+
+        when (setDateDayTemp <= calendar.get(Calendar.DAY_OF_MONTH)){
             true -> {
                 calendar.set(Calendar.DAY_OF_MONTH, 1)
                 calendar.set(Calendar.HOUR_OF_DAY, 0)
