@@ -85,12 +85,10 @@ class MainFragment : Fragment() {
 
     private fun checkDateDeletePref(){
 
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val newDate = calcDate(Calendar.getInstance())
         val lastDate = pref.getString(getString(R.string.deleteDateLast), "")
 
-        if ((calendar.get(Calendar.DAY_OF_MONTH) == pref.getInt(getString(R.string.setDateDay), 0) + 1) &&
-            (dateFormat.format(calendar.time) != lastDate)){
+        if (newDate != lastDate){
 
             saveData(R.drawable.credit_card_white.toString(), 0)
             saveData(R.drawable.wallet_white.toString(), 0)
@@ -108,7 +106,7 @@ class MainFragment : Fragment() {
             saveData("savingMax", 0)
             saveData("savingColor", R.drawable.custom_progress_bar2)
 
-            saveData(getString(R.string.deleteDateLast), dateFormat.format(calendar.time))
+            saveData(getString(R.string.deleteDateLast), newDate)
 
         }
 
