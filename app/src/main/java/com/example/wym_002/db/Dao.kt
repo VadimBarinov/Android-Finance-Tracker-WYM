@@ -28,7 +28,7 @@ interface Dao {
     fun deleteFromItems()
 
     @Transaction
-    fun deleteAll(){
+    fun deleteAll(){                        // удаляет все данные из всех таблиц из бд
         deleteFromSpends()
         deleteFromItems()
     }

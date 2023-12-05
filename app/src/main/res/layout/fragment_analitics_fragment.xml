@@ -147,7 +147,22 @@
         app:layout_constraintBottom_toBottomOf="@+id/piechart"
         app:layout_constraintEnd_toEndOf="@+id/piechart"
         app:layout_constraintStart_toStartOf="@+id/piechart"
-        app:layout_constraintTop_toTopOf="@+id/piechart" />
+        app:layout_constraintTop_toTopOf="@+id/piechart"
+        app:layout_constraintVertical_bias="0.45" />
+
+    <TextView
+        android:id="@+id/textViewYear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ubuntu"
+        android:text="2023"
+        android:textColor="@color/secondaryWhite"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/piechart"
+        app:layout_constraintEnd_toEndOf="@+id/piechart"
+        app:layout_constraintStart_toStartOf="@+id/piechart"
+        app:layout_constraintTop_toTopOf="@+id/piechart"
+        app:layout_constraintVertical_bias="0.55"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cardPanel2"
