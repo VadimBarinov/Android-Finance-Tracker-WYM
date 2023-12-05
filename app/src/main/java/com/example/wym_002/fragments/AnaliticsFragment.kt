@@ -33,9 +33,6 @@ class AnaliticsFragment : Fragment() {
     private lateinit var dialogSetDate: DialogSetDateBinding
     private lateinit var dialogSetDateDatepicker: DialogSetDateDatepickerBinding
 
-    private lateinit var animFlipIn: Animation
-    private lateinit var animFlipOut: Animation
-
     lateinit var db: MainDb
 
     lateinit var pref: SharedPreferences
@@ -70,69 +67,33 @@ class AnaliticsFragment : Fragment() {
         //
         // deleteDateLast                   key: getString(R.string.deleteDateLast)
 
-        animFlipIn = AnimationUtils.loadAnimation(this.activity!!, R.anim.flipin)
-        animFlipOut = AnimationUtils.loadAnimation(this.activity!!, R.anim.flipout)
-
         buttonToEnterDate()
         buttonToSetList()
 
-
-        calcSetMonthDiagram()
-        calcDiagram()
-
-
+        val calendar = Calendar.getInstance()
+        calcSetMonthDiagram(calendar)
 
         return binding.root
     }
 
-    private fun setCurrentMonthForward() {
-        //TODO(НАПИСАТЬ ЗАМЕНУ МЕСЯЦА НА СЛЕДУЮЩИЙ)
+    private fun setCurrentMonthBack(calendar: Calendar) {    // замена месяца на предыдущий
+
+        calendar.set(Calendar.MONTH, (calendar.get(Calendar.MONTH) - 2))
+
+        calcSetMonthDiagram(calendar)
+
     }
 
-    private fun setCurrentMonthBack() {
-        //TODO(НАПИСАТЬ ЗАМЕНУ МЕСЯЦА НА ПРЕДЫДУЩИЙ)
-    }
+    private fun setCurrentMonthForward(calendar: Calendar) {  // замена месяца на следующий
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun swipeForwardBackEnabled() {
+        calendar.set(Calendar.MONTH, (calendar.get(Calendar.MONTH)))
 
-        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {
-            override fun onSwipeLeft() {
-                super.onSwipeLeft()
-                setCurrentMonthForward()
-            }
-            override fun onSwipeRight() {
-                super.onSwipeRight()
-                setCurrentMonthBack()
-            }
-        })
+        calcSetMonthDiagram(calendar)
 
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun swipeForwardBackDisabled() {
-
-        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {})
-
-    }
-
-    private fun buttonsOnDisplayEnabled(){
-
-        buttonBack()
-        buttonForward()
-
-        binding.imageViewBack.visibility = View.VISIBLE
-        binding.imageViewForward.visibility = View.VISIBLE
-
-    }
-    private fun buttonsOnDisplayDisabled(){
-
-        binding.imageViewBack.visibility = View.GONE
-        binding.imageViewForward.visibility = View.GONE
-
-    }
-
-    private fun buttonForward() {
+    private fun buttonsAndSwipeOnDisplayEnabled(calendar: Calendar){
 
         // параметры анимации нажатия
         val buttonClick1 = AlphaAnimation(1f, 0.7f)
@@ -142,6 +103,9 @@ class AnaliticsFragment : Fragment() {
         buttonClick2.duration = 50
         buttonClick2.fillAfter = true
         buttonClick2.startOffset = 70
+
+        binding.imageViewBack.visibility = View.VISIBLE
+        binding.imageViewForward.visibility = View.VISIBLE
 
         binding.imageViewForward.setOnClickListener{
 
@@ -149,22 +113,9 @@ class AnaliticsFragment : Fragment() {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
-            setCurrentMonthForward()
+            setCurrentMonthForward(calendar)
 
         }
-
-    }
-
-    private fun buttonBack() {
-
-        // параметры анимации нажатия
-        val buttonClick1 = AlphaAnimation(1f, 0.7f)
-        buttonClick1.duration = 160
-        buttonClick1.fillAfter = false
-        val buttonClick2 = AlphaAnimation(0.7f, 1f)
-        buttonClick2.duration = 50
-        buttonClick2.fillAfter = true
-        buttonClick2.startOffset = 70
 
         binding.imageViewBack.setOnClickListener{
 
@@ -172,9 +123,32 @@ class AnaliticsFragment : Fragment() {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
-            setCurrentMonthBack()
+            setCurrentMonthBack(calendar)
 
         }
+
+        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {
+            override fun onSwipeLeft() {
+                super.onSwipeLeft()
+                setCurrentMonthForward(calendar)
+            }
+
+            override fun onSwipeRight() {
+                super.onSwipeRight()
+                setCurrentMonthBack(calendar)
+            }
+        })
+
+    }
+
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun buttonsAndSwipeOnDisplayDisabled(){
+
+        binding.imageViewBack.visibility = View.GONE
+        binding.imageViewForward.visibility = View.GONE
+
+        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {})
 
     }
 
@@ -237,7 +211,7 @@ class AnaliticsFragment : Fragment() {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
-            calcSetMonthDiagram()
+            calcSetMonthDiagram(Calendar.getInstance())
 
             dialog.dismiss()
 
@@ -281,6 +255,7 @@ class AnaliticsFragment : Fragment() {
         dialog.setContentView(dialogSetDateDatepicker.root)
         dialog.setCancelable(true)
 
+        buttonsAndSwipeOnDisplayDisabled()
         binding.textViewSave.visibility = View.GONE
         binding.textViewSaveSpend.visibility = View.GONE
 
@@ -306,13 +281,13 @@ class AnaliticsFragment : Fragment() {
             else -> {
                 var month = dateFromTemp.get(Calendar.MONTH) - 1
                 var year = dateFromTemp.get(Calendar.YEAR)
-                if (month == 0) {
-                    month = 12
+                if (month == -1) {
+                    month = 11
                     year -= 1
                 }
                 dateFromTemp.set(Calendar.MONTH, month)
                 dateFromTemp.set(Calendar.YEAR, year)
-                dateFromTemp.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month - 1])
+                dateFromTemp.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month])
             }
         }
 
@@ -336,10 +311,10 @@ class AnaliticsFragment : Fragment() {
             binding.textViewMonth.text = "От: ${dateFormat.format(dateFromTemp.time)}"
             binding.textViewYear.text = "До: ${dateFormat.format(dateToTemp.time)}"
 
-            buttonsOnDisplayDisabled()
-            swipeForwardBackDisabled()
-
-            //TODO(ФИЛЬТРОВАТЬ ПО ВЫБРАННЫМ ДАТАМ)
+            val dateFormatDiagram = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            calcDiagram(dateFormatDiagram.format(dateFromTemp.time),
+                        dateFormatDiagram.format(dateToTemp.time),
+                        dateFormatDiagram.format(dateFromTemp.time))
 
             dialog.dismiss()
 
@@ -355,21 +330,35 @@ class AnaliticsFragment : Fragment() {
         binding.textViewSave.visibility = View.VISIBLE
         binding.textViewSaveSpend.visibility = View.VISIBLE
 
-        buttonsOnDisplayDisabled()
-        swipeForwardBackDisabled()
+        buttonsAndSwipeOnDisplayDisabled()
 
         //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕГО ГОДА)
     }
 
-    private fun calcSetMonthDiagram() {
+    private fun calcSetMonthDiagram(calendar: Calendar) {
 
         binding.textViewSave.visibility = View.VISIBLE
         binding.textViewSaveSpend.visibility = View.VISIBLE
 
-        buttonsOnDisplayEnabled()
-        swipeForwardBackEnabled()
+        binding.textViewMonth.text = when (calendar.get(Calendar.MONTH) + 1){
+            1 -> "Январь"
+            2 -> "Февраль"
+            3 -> "Март"
+            4 -> "Апрель"
+            5 -> "Май"
+            6 -> "Июнь"
+            7 -> "Июль"
+            8 -> "Август"
+            9 -> "Сентябрь"
+            10 -> "Октябрь"
+            11 -> "Ноябрь"
+            else -> "Декабрь"
+        }
 
-        val calendar = Calendar.getInstance()
+        binding.textViewYear.text = calendar.get(Calendar.YEAR).toString()
+
+        buttonsAndSwipeOnDisplayEnabled(calendar)
+
         val month = calendar.get(Calendar.MONTH)
         val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
             true -> {
@@ -381,34 +370,57 @@ class AnaliticsFragment : Fragment() {
         }
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val resetDay = when (arrayOfMonths[month] <
+                (pref.getInt(getString(R.string.setDateDay), 0) + 1)){
+            true -> arrayOfMonths[month]
+            else -> (pref.getInt(getString(R.string.setDateDay), 0) + 1)
+        }
 
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-        val dateFrom = dateFormat.format(calendar.time)
+        calendar.set(Calendar.DAY_OF_MONTH, resetDay)
+
+        val dateFrom = dateFormat.format(calendar.time)          // дата "от"
+        val dateSaving = calcDate(calendar)                 // дата для вывода сбережений
+
 
         calendar.set(Calendar.HOUR_OF_DAY, 23)
         calendar.set(Calendar.MINUTE, 59)
         calendar.set(Calendar.SECOND, 59)
-        calendar.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month - 1])
-        val dateTo = dateFormat.format(calendar.time)
-
-
-            //TODO(ПЕРЕНЕСТИ В ДРУГУЮ ФУНКЦИЮ: БУДЕТ ПРИНИМАТЬ ЗНАЧЕНИЯ ОТ И ДО И ДЕЛАТЬ ЗАПРОСЫ ПО ЭТИМ ЗНАЧЕНИЯМ, И РИСОВАТЬ ДИАГРАММУ)
-        val threadTotalSpends = Thread {
-            binding.textViewTotalSpend.text = db.getDao().getSumByDate(dateFrom, dateTo).toString()
+        when (month < 11){
+            true -> {
+                if (resetDay - 1 == 0){
+                    calendar.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month])
+                }
+                else if (resetDay - 1 >= arrayOfMonths[month + 1]){
+                    calendar.set(Calendar.DAY_OF_MONTH, (arrayOfMonths[month + 1] - 1))
+                    calendar.set(Calendar.MONTH, (month + 1))
+                }
+                else {
+                    calendar.set(Calendar.DAY_OF_MONTH, (resetDay - 1))
+                    calendar.set(Calendar.MONTH, (month + 1))
+                }
+            }
+            else -> {
+                if (resetDay - 1 == 0){
+                    calendar.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month])
+                }
+                else if (resetDay - 1 >= arrayOfMonths[0]){
+                    calendar.set(Calendar.DAY_OF_MONTH, (arrayOfMonths[0] - 1))
+                    calendar.set(Calendar.MONTH, 0)
+                    calendar.set(Calendar.YEAR, (calendar.get(Calendar.YEAR) + 1))
+                }
+                else {
+                    calendar.set(Calendar.DAY_OF_MONTH, (resetDay - 1))
+                    calendar.set(Calendar.MONTH, 0)
+                    calendar.set(Calendar.YEAR, (calendar.get(Calendar.YEAR) + 1))
+                }
+            }
         }
-        threadTotalSpends.start()
-        threadTotalSpends.join()
+        val dateTo = dateFormat.format(calendar.time)           // дата "до"
 
-        val threadSaving = Thread {
-            binding.textViewSaveSpend.text = db.getDao().getSavingByDate(dateFrom).toString()
-        }
-        threadSaving.start()
-        threadSaving.join()
-
-        //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕГО МЕСЯЦА: диаграмма)
+        calcDiagram(dateFrom, dateTo, dateSaving)
 
     }
 
@@ -417,8 +429,7 @@ class AnaliticsFragment : Fragment() {
         binding.textViewSave.visibility = View.GONE
         binding.textViewSaveSpend.visibility = View.GONE
 
-        buttonsOnDisplayDisabled()
-        swipeForwardBackDisabled()
+        buttonsAndSwipeOnDisplayDisabled()
 
         //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕЙ НЕДЕЛИ)
     }
@@ -482,9 +493,24 @@ class AnaliticsFragment : Fragment() {
 
 
     @SuppressLint("ResourceType")
-    private fun calcDiagram() {
+    private fun calcDiagram(dateFrom: String, dateTo: String, dateSaving: String) {
+
+        //TODO(ДОПИСАТЬ ПОДСЧЕТ ОСТАЛЬНЫХ СЧЕТЧИКОВ НА ЭКРАНЕ)
+        val threadTotalSpends = Thread {
+            binding.textViewTotalSpend.text = db.getDao().getSumByDate(dateFrom, dateTo).toString()
+        }
+        threadTotalSpends.start()
+        threadTotalSpends.join()
+
+        val threadSaving = Thread {
+            binding.textViewSaveSpend.text = db.getDao().getSavingByDate(dateSaving).toString()
+        }
+        threadSaving.start()
+        threadSaving.join()
 
         //TODO(СДЕЛАТЬ ПОДСЧЕТ И ВЫВОД В ДИАГРАММУ)
+
+        binding.piechart.clearChart()       // чтобы не накладывал на предыдущее
 
         binding.piechart.addPieSlice(
             PieModel(
@@ -540,6 +566,55 @@ class AnaliticsFragment : Fragment() {
         binding.piechart.startAnimation()
     }
 
+    private fun calcDate(calendar: Calendar): String{
+
+        // ЕСЛИ ДАТА БОЛЬШЕ ИЛИ РАВНА ДАТЕ НАЧАЛА УЧЕТА, ТО БЮДЖЕТ ДОБАВЛЯЕТСЯ В ПЕРВЫЙ ДЕНЬ ТЕКУЩЕГО МЕСЯЦА
+        // ЕСЛИ ЖЕ ДАТА МЕНЬШЕ, ТО БЮДЖЕТ ДОБАВЛЯЕСЯ В ПЕРВОЕ ЧИСЛО ПРОШЛОГО МЕСЯЦА
+
+        val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
+            true -> {
+                arrayOf(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+            else ->{
+                arrayOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+        }
+
+        val setDateDayTemp = when (arrayOfMonths[calendar.get(Calendar.MONTH)] <
+                (pref.getInt(getString(R.string.setDateDay), 0) + 1)){
+            true -> arrayOfMonths[calendar.get(Calendar.MONTH)]
+            else -> (pref.getInt(getString(R.string.setDateDay), 0) + 1)
+        }
+
+        when (setDateDayTemp <= calendar.get(Calendar.DAY_OF_MONTH)){
+            true -> {
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+                return dateFormat.format(calendar.time)
+            }
+            else -> {
+                var month = calendar.get(Calendar.MONTH) - 1
+                var year = calendar.get(Calendar.YEAR)
+                if (month == -1) {
+                    month = 11
+                    year -= 1
+                }
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+                return dateFormat.format(calendar.time)
+            }
+        }
+    }
 
     private fun buttonToSetList() {
 

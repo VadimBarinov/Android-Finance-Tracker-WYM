@@ -456,10 +456,10 @@ class MainFragment : Fragment() {
         val calendar = Calendar.getInstance()
 
         val datePickerDialog = DatePickerDialog(
-            this.activity!!, { DatePicker, year: Int, monthOfYear: Int, dayOfMonth: Int ->
+            this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
 
                 val timePickerDialog = TimePickerDialog(
-                    this.activity!!, { TimePicker, hourOfDay: Int, minute: Int ->
+                    this.activity!!, { _, hourOfDay: Int, minute: Int ->
                         selectedDate.set(year, monthOfYear, dayOfMonth, hourOfDay, minute)
                         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
                         val textDate = "Дата: ${dateFormat.format(selectedDate.time)}"
@@ -648,9 +648,9 @@ class MainFragment : Fragment() {
             }
         }
 
-        val setDateDayTemp = when (arrayOfMonths[calendar.get(Calendar.MONTH) - 1] <
+        val setDateDayTemp = when (arrayOfMonths[calendar.get(Calendar.MONTH)] <
                 (pref.getInt(getString(R.string.setDateDay), 0) + 1)){
-            true -> arrayOfMonths[calendar.get(Calendar.MONTH) - 1]
+            true -> arrayOfMonths[calendar.get(Calendar.MONTH)]
             else -> (pref.getInt(getString(R.string.setDateDay), 0) + 1)
         }
 
@@ -667,8 +667,8 @@ class MainFragment : Fragment() {
             else -> {
                 var month = calendar.get(Calendar.MONTH) - 1
                 var year = calendar.get(Calendar.YEAR)
-                if (month == 0) {
-                    month = 12
+                if (month == -1) {
+                    month = 11
                     year -= 1
                 }
                 calendar.set(Calendar.MONTH, month)
