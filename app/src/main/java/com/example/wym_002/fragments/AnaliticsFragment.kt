@@ -3,6 +3,8 @@ package com.example.wym_002.fragments
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -16,6 +18,7 @@ import com.example.wym_002.R
 import com.example.wym_002.databinding.DialogSetDateBinding
 import com.example.wym_002.databinding.DialogSetDateDatepickerBinding
 import com.example.wym_002.databinding.FragmentAnaliticsFragmentBinding
+import com.example.wym_002.db.MainDb
 import com.example.wym_002.hidingPanel
 import org.eazegraph.lib.models.PieModel
 import java.text.SimpleDateFormat
@@ -30,10 +33,12 @@ class AnaliticsFragment : Fragment() {
     private lateinit var dialogSetDate: DialogSetDateBinding
     private lateinit var dialogSetDateDatepicker: DialogSetDateDatepickerBinding
 
-    private val calendar = Calendar.getInstance()
-
     private lateinit var animFlipIn: Animation
     private lateinit var animFlipOut: Animation
+
+    lateinit var db: MainDb
+
+    lateinit var pref: SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +47,29 @@ class AnaliticsFragment : Fragment() {
 
         binding = FragmentAnaliticsFragmentBinding.inflate(layoutInflater)
 
+        db = MainDb.getDb(this.activity!!)
+
+        pref = context!!.getSharedPreferences("pref", Context.MODE_PRIVATE)
+        // resultCardBalance        key: R.drawable.credit_card_white.toString()
+        // resultWalletBalance      key: R.drawable.wallet_white.toString()
+        // resultBankBalance        key: R.drawable.account_balance_white.toString()
+        //
+        // progressBarMainProgress          key: mainProgress
+        // progressBarMainMax               key: mainMax
+        // progressBarMainColor               key: mainColor
+        // progressBarSecondProgress        key: secondProgress
+        // progressBarSecondMax             key: secondMax
+        // progressBarSecondColor             key: secondColor
+        // progressBarSavingProgress        key: savingProgress
+        // progressBarSavingMax             key: savingMax
+        // progressBarSavingColor             key: savingColor
+        //
+        // checkSplashScreen        key: getString(R.string.flagSplashScreen)      ОБРАТНЫЕ ПЕРЕМЕННЫЕ
+        //                                                                        0 == TRUE   1 == FALSE
+        // setDateDay               key: getString(R.string.setDateDay)
+        //
+        // deleteDateLast                   key: getString(R.string.deleteDateLast)
+
         animFlipIn = AnimationUtils.loadAnimation(this.activity!!, R.anim.flipin)
         animFlipOut = AnimationUtils.loadAnimation(this.activity!!, R.anim.flipout)
 
@@ -49,15 +77,12 @@ class AnaliticsFragment : Fragment() {
         buttonToSetList()
 
 
-        return binding.root
-    }
-
-    override fun onStart() {      // указывает по умолчанию режим месяц
-        super.onStart()
-
         calcSetMonthDiagram()
         calcDiagram()
 
+
+
+        return binding.root
     }
 
     private fun setCurrentMonthForward() {
@@ -87,14 +112,7 @@ class AnaliticsFragment : Fragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun swipeForwardBackDisabled() {
 
-        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {
-            override fun onSwipeLeft() {
-                super.onSwipeLeft()
-            }
-            override fun onSwipeRight() {
-                super.onSwipeRight()
-            }
-        })
+        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {})
 
     }
 
@@ -271,6 +289,7 @@ class AnaliticsFragment : Fragment() {
         var dateFromTemp = Calendar.getInstance()
         var dateToTemp = Calendar.getInstance()
 
+        val calendar = Calendar.getInstance()
         val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
             true -> {
                 arrayOf(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
@@ -350,7 +369,47 @@ class AnaliticsFragment : Fragment() {
         buttonsOnDisplayEnabled()
         swipeForwardBackEnabled()
 
-        //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕГО МЕСЯЦА)
+        val calendar = Calendar.getInstance()
+        val month = calendar.get(Calendar.MONTH)
+        val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
+            true -> {
+                arrayOf(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+            else ->{
+                arrayOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+        }
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        val dateFrom = dateFormat.format(calendar.time)
+
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month - 1])
+        val dateTo = dateFormat.format(calendar.time)
+
+
+            //TODO(ПЕРЕНЕСТИ В ДРУГУЮ ФУНКЦИЮ: БУДЕТ ПРИНИМАТЬ ЗНАЧЕНИЯ ОТ И ДО И ДЕЛАТЬ ЗАПРОСЫ ПО ЭТИМ ЗНАЧЕНИЯМ, И РИСОВАТЬ ДИАГРАММУ)
+        val threadTotalSpends = Thread {
+            binding.textViewTotalSpend.text = db.getDao().getSumByDate(dateFrom, dateTo).toString()
+        }
+        threadTotalSpends.start()
+        threadTotalSpends.join()
+
+        val threadSaving = Thread {
+            binding.textViewSaveSpend.text = db.getDao().getSavingByDate(dateFrom).toString()
+        }
+        threadSaving.start()
+        threadSaving.join()
+
+        //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕГО МЕСЯЦА: диаграмма)
+
     }
 
     private fun calcSetWeekDiagram() {
@@ -370,7 +429,7 @@ class AnaliticsFragment : Fragment() {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
         val datePickerDialog = DatePickerDialog(
-            this.activity!!, { DatePicker, year: Int, monthOfYear: Int, dayOfMonth: Int ->
+            this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
                 selectedDate.set(year, monthOfYear, dayOfMonth)
                 selectedDate.set(Calendar.SECOND, 0)
 
@@ -398,7 +457,7 @@ class AnaliticsFragment : Fragment() {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
         val datePickerDialog = DatePickerDialog(
-            this.activity!!, { DatePicker, year: Int, monthOfYear: Int, dayOfMonth: Int ->
+            this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
                 selectedDate.set(year, monthOfYear, dayOfMonth)
                 selectedDate.set(Calendar.SECOND, 0)
 

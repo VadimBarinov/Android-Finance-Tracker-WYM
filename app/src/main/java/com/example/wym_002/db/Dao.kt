@@ -15,11 +15,17 @@ interface Dao {
     @Query ("SELECT SUM(budget) FROM spends WHERE data = :selData")      // выводит бюджет по выбранной дате
     fun getBudgetData(selData: String): Int?
 
-    @Query ("SELECT SUM(savings) FROM spends WHERE data = :selData")      // выводит сбрежения по выбранной дате
-    fun getSavingData(selData: String): Int?
-
     @Query("SELECT * FROM items")
     fun getAllItems(): Flow<List<Items>>
+
+    @Query("SELECT * FROM items WHERE data BETWEEN :dateFrom AND :dateTo") // выводит записи по выбранной дате
+    fun getItemsByDate(dateFrom: String, dateTo: String): Flow<List<Items>>
+
+    @Query("SELECT SUM(amount) FROM items WHERE data BETWEEN :dateFrom AND :dateTo") // выводит сумму трат по выбранной дате
+    fun getSumByDate(dateFrom: String, dateTo: String): Int
+
+    @Query("SELECT SUM(savings) FROM spends WHERE data = :selectedDate") // выводит сумму трат по выбранной дате
+    fun getSavingByDate(selectedDate: String): Int
 
     @Query ("DELETE FROM spends")
     fun deleteFromSpends()
