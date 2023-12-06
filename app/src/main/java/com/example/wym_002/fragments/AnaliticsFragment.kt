@@ -364,7 +364,11 @@ class AnaliticsFragment : Fragment() {
 
         buttonsAndSwipeOnDisplayDisabled()
 
-        //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕГО ГОДА)
+        val dateFrom = "${Calendar.getInstance().get(Calendar.YEAR)}-01-01 00:00:00"
+        val dateTo = "${Calendar.getInstance().get(Calendar.YEAR)}-12-31 23:59:59"
+
+        calcDiagram(dateFrom, dateTo, dateFrom, dateTo)
+
     }
 
     private fun calcSetMonthDiagram(calendar: Calendar) {
@@ -477,13 +481,14 @@ class AnaliticsFragment : Fragment() {
 
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun calcSetWeekDiagram() {
 
         binding.textViewSave.visibility = View.GONE
         binding.textViewSaveSpend.visibility = View.GONE
 
         binding.textViewTotalSpend.visibility = View.GONE
-        binding.textViewTotalSpend2.visibility = View.VISIBLE       // TODO (НЕ ЗАБЫТЬ ПРО ДРУГОЙ ТЕКСТВЬЮ)
+        binding.textViewTotalSpend2.visibility = View.VISIBLE
 
         binding.textViewMonth.visibility = View.GONE
         binding.textViewYear.visibility = View.GONE
@@ -493,8 +498,36 @@ class AnaliticsFragment : Fragment() {
 
         buttonsAndSwipeOnDisplayDisabled()
 
-        //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕЙ НЕДЕЛИ)
-        // НУЖНО БУДЕТ ОПРЕДЕЛЯТЬ БЛИЖАЙШИЙ ПОНЕДЕЛЬНИК И ОТ НЕГО ДО ВОСКРЕСЕНЬЯ ВЫВОДИТЬ
+        val calendarDate = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("EEEE")
+        var dayOfTheWeek = dateFormat.format(calendarDate.time)   // день недели строкой
+
+        while (dayOfTheWeek != "понедельник"){      // в итоге получим дату ближайшего понедельника
+            calendarDate.set(Calendar.DAY_OF_MONTH, (calendarDate.get(Calendar.DAY_OF_MONTH) - 1))
+            dayOfTheWeek = dateFormat.format(calendarDate.time)
+        }
+
+        val dateFormatDiagram = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+        calendarDate.set(Calendar.HOUR_OF_DAY, 0)
+        calendarDate.set(Calendar.MINUTE, 0)
+        calendarDate.set(Calendar.SECOND, 0)
+        val dateFrom = dateFormatDiagram.format(calendarDate.time)
+
+        calendarDate.set(Calendar.DAY_OF_MONTH, (calendarDate.get(Calendar.DAY_OF_MONTH) + 6))
+        calendarDate.set(Calendar.HOUR_OF_DAY, 23)
+        calendarDate.set(Calendar.MINUTE, 59)
+        calendarDate.set(Calendar.SECOND, 59)
+        val dateTo = dateFormatDiagram.format(calendarDate.time)
+
+        val threadTotalSpends = Thread {
+            binding.textViewTotalSpend2.text = db.getDao().getSumByDate(dateFrom, dateTo).toString()
+        }
+        threadTotalSpends.start()
+        threadTotalSpends.join()
+
+        calcDiagram(dateFrom, dateTo, dateFrom, dateTo)
+
     }
 
     @SuppressLint("SetTextI18n")
