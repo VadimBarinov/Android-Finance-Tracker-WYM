@@ -175,7 +175,7 @@ class SettingsFragment : Fragment() {
         dialogScrollDate.numberPicker.value = pref.getInt(getString(R.string.setDateDay), 0) + 1
         dialogScrollDate.numberPicker.wrapSelectorWheel = false
 
-        var res = 0  // день начала учета
+        var res = pref.getInt(getString(R.string.setDateDay), 0)  // день начала учета
 
         dialogScrollDate.numberPicker.setOnValueChangedListener{ _, _, newVal ->
             res = newVal - 1

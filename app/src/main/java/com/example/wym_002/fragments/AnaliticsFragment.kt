@@ -314,6 +314,7 @@ class AnaliticsFragment : Fragment() {
             val dateFormatDiagram = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             calcDiagram(dateFormatDiagram.format(dateFromTemp.time),
                         dateFormatDiagram.format(dateToTemp.time),
+                        dateFormatDiagram.format(dateFromTemp.time),
                         dateFormatDiagram.format(dateFromTemp.time))
 
             dialog.dismiss()
@@ -420,7 +421,7 @@ class AnaliticsFragment : Fragment() {
         }
         val dateTo = dateFormat.format(calendar.time)           // дата "до"
 
-        calcDiagram(dateFrom, dateTo, dateSaving)
+        calcDiagram(dateFrom, dateTo, dateSaving, dateSaving)
 
     }
 
@@ -493,7 +494,7 @@ class AnaliticsFragment : Fragment() {
 
 
     @SuppressLint("ResourceType")
-    private fun calcDiagram(dateFrom: String, dateTo: String, dateSaving: String) {
+    private fun calcDiagram(dateFrom: String, dateTo: String, dateSavingFrom: String, dateSavingTo: String) {
 
         //TODO(ДОПИСАТЬ ПОДСЧЕТ ОСТАЛЬНЫХ СЧЕТЧИКОВ НА ЭКРАНЕ)
         val threadTotalSpends = Thread {
@@ -503,7 +504,7 @@ class AnaliticsFragment : Fragment() {
         threadTotalSpends.join()
 
         val threadSaving = Thread {
-            binding.textViewSaveSpend.text = db.getDao().getSavingByDate(dateSaving).toString()
+            binding.textViewSaveSpend.text = db.getDao().getSavingByDate(dateSavingFrom, dateSavingTo).toString()
         }
         threadSaving.start()
         threadSaving.join()

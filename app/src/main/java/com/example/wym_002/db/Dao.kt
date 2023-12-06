@@ -24,8 +24,8 @@ interface Dao {
     @Query("SELECT SUM(amount) FROM items WHERE data BETWEEN :dateFrom AND :dateTo") // выводит сумму трат по выбранной дате
     fun getSumByDate(dateFrom: String, dateTo: String): Int
 
-    @Query("SELECT SUM(savings) FROM spends WHERE data = :selectedDate") // выводит сумму трат по выбранной дате
-    fun getSavingByDate(selectedDate: String): Int
+    @Query("SELECT SUM(savings) FROM spends WHERE data BETWEEN :dateFrom AND :dateTo") // выводит сумму трат по выбранной дате
+    fun getSavingByDate(dateFrom: String, dateTo: String): Int            // берет промежуток чтобы за год тоже считалось
 
     @Query ("DELETE FROM spends")
     fun deleteFromSpends()
