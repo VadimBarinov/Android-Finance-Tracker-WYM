@@ -10,8 +10,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
 import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import app.com.kotlinapp.OnSwipeTouchListener
 import com.example.wym_002.R
@@ -433,6 +431,7 @@ class AnaliticsFragment : Fragment() {
         buttonsAndSwipeOnDisplayDisabled()
 
         //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕЙ НЕДЕЛИ)
+        // НУЖНО БУДЕТ ОПРЕДЕЛЯТЬ БЛИЖАЙШИЙ ПОНЕДЕЛЬНИК И ОТ НЕГО ДО ВОСКРЕСЕНЬЯ ВЫВОДИТЬ
     }
 
     @SuppressLint("SetTextI18n")
