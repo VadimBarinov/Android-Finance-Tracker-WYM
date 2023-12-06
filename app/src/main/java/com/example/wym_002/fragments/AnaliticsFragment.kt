@@ -253,14 +253,17 @@ class AnaliticsFragment : Fragment() {
         dialog.setContentView(dialogSetDateDatepicker.root)
         dialog.setCancelable(true)
 
-        buttonsAndSwipeOnDisplayDisabled()
-        binding.textViewSave.visibility = View.GONE
-        binding.textViewSaveSpend.visibility = View.GONE
-
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
         var dateFromTemp = Calendar.getInstance()
+        dateFromTemp.set(Calendar.HOUR_OF_DAY, 0)
+        dateFromTemp.set(Calendar.MINUTE, 0)
+        dateFromTemp.set(Calendar.SECOND, 0)
+
         var dateToTemp = Calendar.getInstance()
+        dateToTemp.set(Calendar.HOUR_OF_DAY, 23)
+        dateToTemp.set(Calendar.MINUTE, 59)
+        dateToTemp.set(Calendar.SECOND, 59)
 
         val calendar = Calendar.getInstance()
         val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
@@ -306,10 +309,31 @@ class AnaliticsFragment : Fragment() {
 
         dialogSetDateDatepicker.dialogBtn.setOnClickListener{
 
+            binding.textViewSave.visibility = View.GONE
+            binding.textViewSaveSpend.visibility = View.GONE
+
+            binding.textViewTotalSpend.visibility = View.GONE
+            binding.textViewTotalSpend2.visibility = View.VISIBLE
+
+            binding.textViewMonth.visibility = View.VISIBLE
+            binding.textViewYear.visibility = View.VISIBLE
+            binding.textViewYear2.visibility = View.GONE
+
+            buttonsAndSwipeOnDisplayDisabled()
+
             binding.textViewMonth.text = "От: ${dateFormat.format(dateFromTemp.time)}"
             binding.textViewYear.text = "До: ${dateFormat.format(dateToTemp.time)}"
 
             val dateFormatDiagram = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+            val threadTotalSpends = Thread {
+                binding.textViewTotalSpend2.text = db.getDao().getSumByDate(
+                    dateFormatDiagram.format(dateFromTemp.time),
+                    dateFormatDiagram.format(dateToTemp.time)).toString()
+            }
+            threadTotalSpends.start()
+            threadTotalSpends.join()
+
             calcDiagram(dateFormatDiagram.format(dateFromTemp.time),
                         dateFormatDiagram.format(dateToTemp.time),
                         dateFormatDiagram.format(dateFromTemp.time),
@@ -329,6 +353,15 @@ class AnaliticsFragment : Fragment() {
         binding.textViewSave.visibility = View.VISIBLE
         binding.textViewSaveSpend.visibility = View.VISIBLE
 
+        binding.textViewTotalSpend.visibility = View.VISIBLE
+        binding.textViewTotalSpend2.visibility = View.GONE
+
+        binding.textViewMonth.visibility = View.GONE
+        binding.textViewYear.visibility = View.GONE
+        binding.textViewYear2.visibility = View.VISIBLE    // год по центру
+
+        binding.textViewYear2.text = Calendar.getInstance().get(Calendar.YEAR).toString()
+
         buttonsAndSwipeOnDisplayDisabled()
 
         //TODO(НАПИСАТЬ ЧТОБЫ СЧИТАЛОСЬ ОТНОСИТЕЛЬНО ТЕКУЩЕГО ГОДА)
@@ -338,6 +371,15 @@ class AnaliticsFragment : Fragment() {
 
         binding.textViewSave.visibility = View.VISIBLE
         binding.textViewSaveSpend.visibility = View.VISIBLE
+
+        binding.textViewTotalSpend.visibility = View.VISIBLE
+        binding.textViewTotalSpend2.visibility = View.GONE
+
+        binding.textViewMonth.visibility = View.VISIBLE
+        binding.textViewYear.visibility = View.VISIBLE
+        binding.textViewYear2.visibility = View.GONE
+
+        buttonsAndSwipeOnDisplayEnabled(calendar)
 
         binding.textViewMonth.text = when (calendar.get(Calendar.MONTH) + 1){
             1 -> "Январь"
@@ -355,8 +397,6 @@ class AnaliticsFragment : Fragment() {
         }
 
         binding.textViewYear.text = calendar.get(Calendar.YEAR).toString()
-
-        buttonsAndSwipeOnDisplayEnabled(calendar)
 
         val month = calendar.get(Calendar.MONTH)
         val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
@@ -419,6 +459,20 @@ class AnaliticsFragment : Fragment() {
         }
         val dateTo = dateFormat.format(calendar.time)           // дата "до"
 
+        if (resetDay == 1) {
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.DAY_OF_MONTH, resetDay)
+            when (month < 11) {
+                true -> calendar.set(Calendar.MONTH, (month + 1))
+                else -> {
+                    calendar.set(Calendar.MONTH, 0)
+                    calendar.set(Calendar.YEAR, (calendar.get(Calendar.YEAR) + 1))
+                }
+            }
+        }
+
         calcDiagram(dateFrom, dateTo, dateSaving, dateSaving)
 
     }
@@ -427,6 +481,15 @@ class AnaliticsFragment : Fragment() {
 
         binding.textViewSave.visibility = View.GONE
         binding.textViewSaveSpend.visibility = View.GONE
+
+        binding.textViewTotalSpend.visibility = View.GONE
+        binding.textViewTotalSpend2.visibility = View.VISIBLE       // TODO (НЕ ЗАБЫТЬ ПРО ДРУГОЙ ТЕКСТВЬЮ)
+
+        binding.textViewMonth.visibility = View.GONE
+        binding.textViewYear.visibility = View.GONE
+        binding.textViewYear2.visibility = View.VISIBLE
+
+        binding.textViewYear2.text = "Текущая неделя"
 
         buttonsAndSwipeOnDisplayDisabled()
 
@@ -442,6 +505,8 @@ class AnaliticsFragment : Fragment() {
         val datePickerDialog = DatePickerDialog(
             this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
                 selectedDate.set(year, monthOfYear, dayOfMonth)
+                selectedDate.set(Calendar.HOUR_OF_DAY, 0)
+                selectedDate.set(Calendar.MINUTE, 0)
                 selectedDate.set(Calendar.SECOND, 0)
 
                 dialogSetDateDatepicker.enterDataFrom.text = "От: ${dateFormat.format(selectedDate.time)}"
@@ -470,7 +535,9 @@ class AnaliticsFragment : Fragment() {
         val datePickerDialog = DatePickerDialog(
             this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
                 selectedDate.set(year, monthOfYear, dayOfMonth)
-                selectedDate.set(Calendar.SECOND, 0)
+                selectedDate.set(Calendar.HOUR_OF_DAY, 23)
+                selectedDate.set(Calendar.MINUTE, 59)
+                selectedDate.set(Calendar.SECOND, 59)
 
                 dialogSetDateDatepicker.enterDataTo.text = "До: ${dateFormat.format(selectedDate.time)}"
 
@@ -495,7 +562,6 @@ class AnaliticsFragment : Fragment() {
     @SuppressLint("ResourceType")
     private fun calcDiagram(dateFrom: String, dateTo: String, dateSavingFrom: String, dateSavingTo: String) {
 
-        //TODO(ДОПИСАТЬ ПОДСЧЕТ ОСТАЛЬНЫХ СЧЕТЧИКОВ НА ЭКРАНЕ)
         val threadTotalSpends = Thread {
             binding.textViewTotalSpend.text = db.getDao().getSumByDate(dateFrom, dateTo).toString()
         }
@@ -508,58 +574,168 @@ class AnaliticsFragment : Fragment() {
         threadSaving.start()
         threadSaving.join()
 
-        //TODO(СДЕЛАТЬ ПОДСЧЕТ И ВЫВОД В ДИАГРАММУ)
-
         binding.piechart.clearChart()       // чтобы не накладывал на предыдущее
 
-        binding.piechart.addPieSlice(
-            PieModel(
-                "house", 3F,
-                Color.parseColor(getString(R.color.house))
+        val totalSpend = Integer.parseInt(binding.textViewTotalSpend.text.toString())   // 100 %
+
+        if (totalSpend != 0){
+
+            val threadHouse = Thread {
+
+                val houseValue = db.getDao().getSumWithCategoryByDate(getString(R.string.house), dateFrom, dateTo)
+                val calcValueFloat = (houseValue * 100F) / totalSpend
+
+                binding.textViewHouseSum.text = houseValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "house", calcValueFloat,
+                        Color.parseColor(getString(R.color.house))
+                    )
+                )
+            }
+            threadHouse.start()
+            threadHouse.join()
+
+            val threadBus = Thread {
+
+                val busValue = db.getDao().getSumWithCategoryByDate(getString(R.string.bus), dateFrom, dateTo)
+                val calcValueFloat = (busValue * 100F) / totalSpend
+
+                binding.textViewBusSum.text = busValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "bus", calcValueFloat,
+                        Color.parseColor(getString(R.color.bus))
+                    )
+                )
+            }
+            threadBus.start()
+            threadBus.join()
+
+            val threadFoodHouse = Thread {
+
+                val foodHouseValue = db.getDao().getSumWithCategoryByDate(getString(R.string.food_house), dateFrom, dateTo)
+                val calcValueFloat = (foodHouseValue * 100F) / totalSpend
+
+                binding.textViewFoodHouseSum.text = foodHouseValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "foodHouse", calcValueFloat,
+                        Color.parseColor(getString(R.color.food_house))
+                    )
+                )
+            }
+            threadFoodHouse.start()
+            threadFoodHouse.join()
+
+            val threadHealth = Thread {
+
+                val healthValue = db.getDao().getSumWithCategoryByDate(getString(R.string.health), dateFrom, dateTo)
+                val calcValueFloat = (healthValue * 100F) / totalSpend
+
+                binding.textViewHealthSum.text = healthValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "health", calcValueFloat,
+                        Color.parseColor(getString(R.color.health))
+                    )
+                )
+            }
+            threadHealth.start()
+            threadHealth.join()
+
+            val threadCoffee = Thread {
+
+                val coffeeValue = db.getDao().getSumWithCategoryByDate(getString(R.string.coffee), dateFrom, dateTo)
+                val calcValueFloat = (coffeeValue * 100F) / totalSpend
+
+                binding.textViewCoffeeSum.text = coffeeValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "coffee", calcValueFloat,
+                        Color.parseColor(getString(R.color.coffee))
+                    )
+                )
+            }
+            threadCoffee.start()
+            threadCoffee.join()
+
+            val threadGames = Thread {
+
+                val gamesValue = db.getDao().getSumWithCategoryByDate(getString(R.string.games), dateFrom, dateTo)
+                val calcValueFloat = (gamesValue * 100F) / totalSpend
+
+                binding.textViewGamesSum.text = gamesValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "games", calcValueFloat,
+                        Color.parseColor(getString(R.color.games))
+                    )
+                )
+            }
+            threadGames.start()
+            threadGames.join()
+
+            val threadClothes = Thread {
+
+                val clothesValue = db.getDao().getSumWithCategoryByDate(getString(R.string.clothes), dateFrom, dateTo)
+                val calcValueFloat = (clothesValue * 100F) / totalSpend
+
+                binding.textViewClothesSum.text = clothesValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "clothes", calcValueFloat,
+                        Color.parseColor(getString(R.color.clothes))
+                    )
+                )
+            }
+            threadClothes.start()
+            threadClothes.join()
+
+            val threadAnother = Thread {
+
+                val anotherValue = db.getDao().getSumWithCategoryByDate(getString(R.string.another), dateFrom, dateTo)
+                val calcValueFloat = (anotherValue * 100F) / totalSpend
+
+                binding.textViewAnotherSum.text = anotherValue.toString()
+
+                binding.piechart.addPieSlice(
+                    PieModel(
+                        "another", calcValueFloat,
+                        Color.parseColor(getString(R.color.another))
+                    )
+                )
+            }
+            threadAnother.start()
+            threadAnother.join()
+
+        }
+        else{
+
+            binding.textViewHouseSum.text = "0"
+            binding.textViewBusSum.text = "0"
+            binding.textViewFoodHouseSum.text = "0"
+            binding.textViewHealthSum.text = "0"
+            binding.textViewCoffeeSum.text = "0"
+            binding.textViewGamesSum.text = "0"
+            binding.textViewClothesSum.text = "0"
+            binding.textViewAnotherSum.text = "0"
+
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "empty", 100F,
+                    Color.parseColor(getString(R.color.greyWYM))
+                )
             )
-        )
-        binding.piechart.addPieSlice(
-            PieModel(
-                "bus", 4F,
-                Color.parseColor(getString(R.color.bus))
-            )
-        )
-        binding.piechart.addPieSlice(
-            PieModel(
-                "foodHouse", 5.5F,
-                Color.parseColor(getString(R.color.food_house))
-            )
-        )
-        binding.piechart.addPieSlice(
-            PieModel(
-                "health", 8F,
-                Color.parseColor(getString(R.color.health))
-            )
-        )
-        binding.piechart.addPieSlice(
-            PieModel(
-                "coffee", 20F,
-                Color.parseColor(getString(R.color.coffee))
-            )
-        )
-        binding.piechart.addPieSlice(
-            PieModel(
-                "games", 8F,
-                Color.parseColor(getString(R.color.games))
-            )
-        )
-        binding.piechart.addPieSlice(
-            PieModel(
-                "clothes", 20F,
-                Color.parseColor(getString(R.color.clothes))
-            )
-        )
-        binding.piechart.addPieSlice(
-            PieModel(
-                "another", 31.5F,
-                Color.parseColor(getString(R.color.another))
-            )
-        )
+
+        }
 
         binding.piechart.animationTime = 600
 
