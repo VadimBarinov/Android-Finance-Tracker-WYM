@@ -105,6 +105,9 @@ class AnaliticsFragment : Fragment() {
         binding.imageViewBack.visibility = View.VISIBLE
         binding.imageViewForward.visibility = View.VISIBLE
 
+        binding.imageViewBack2.visibility = View.VISIBLE
+        binding.imageViewForward2.visibility = View.VISIBLE
+
         binding.imageViewForward.setOnClickListener{
 
             it.startAnimation(buttonClick1)
@@ -145,6 +148,13 @@ class AnaliticsFragment : Fragment() {
 
         binding.imageViewBack.visibility = View.GONE
         binding.imageViewForward.visibility = View.GONE
+
+        binding.imageViewBack2.visibility = View.GONE
+        binding.imageViewForward2.visibility = View.GONE
+
+        binding.imageViewForward.setOnClickListener{}
+
+        binding.imageViewBack.setOnClickListener{}
 
         binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {})
 
@@ -613,6 +623,10 @@ class AnaliticsFragment : Fragment() {
 
         if (totalSpend != 0){
 
+            binding.textViewMonth.setTextColor(Color.parseColor(getString(R.color.secondaryWhite)))
+            binding.textViewYear.setTextColor(Color.parseColor(getString(R.color.secondaryWhite)))
+            binding.textViewYear2.setTextColor(Color.parseColor(getString(R.color.secondaryWhite)))
+
             val threadHouse = Thread {
 
                 val houseValue = db.getDao().getSumWithCategoryByDate(getString(R.string.house), dateFrom, dateTo)
@@ -751,6 +765,10 @@ class AnaliticsFragment : Fragment() {
 
         }
         else{
+
+            binding.textViewMonth.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+            binding.textViewYear.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+            binding.textViewYear2.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
 
             binding.textViewHouseSum.text = "0"
             binding.textViewBusSum.text = "0"
