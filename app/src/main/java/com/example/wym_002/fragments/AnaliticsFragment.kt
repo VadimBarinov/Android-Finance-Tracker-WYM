@@ -7,14 +7,18 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.opengl.Visibility
 import android.os.Bundle
 import android.view.*
 import android.view.animation.AlphaAnimation
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import app.com.kotlinapp.OnSwipeTouchListener
 import com.example.wym_002.R
+import com.example.wym_002.databinding.DialogSetCardBinding
 import com.example.wym_002.databinding.DialogSetDateBinding
 import com.example.wym_002.databinding.DialogSetDateDatepickerBinding
+import com.example.wym_002.databinding.DialogSetDateListBinding
 import com.example.wym_002.databinding.FragmentAnaliticsFragmentBinding
 import com.example.wym_002.db.MainDb
 import com.example.wym_002.hidingPanel
@@ -30,6 +34,9 @@ class AnaliticsFragment : Fragment() {
     private lateinit var dialog: Dialog
     private lateinit var dialogSetDate: DialogSetDateBinding
     private lateinit var dialogSetDateDatepicker: DialogSetDateDatepickerBinding
+
+    private lateinit var dialogSetDateOnListView: DialogSetDateListBinding
+    private lateinit var dialogSetCardOnListView: DialogSetCardBinding
 
     lateinit var db: MainDb
 
@@ -65,11 +72,22 @@ class AnaliticsFragment : Fragment() {
         //
         // deleteDateLast                   key: getString(R.string.deleteDateLast)
 
-        buttonToEnterDate()
-        buttonToSetList()
+        buttonToSetList()       // меняет экраны
+
+        buttonToEnterDate()       // выбор даты для диаграммы
 
         val calendar = Calendar.getInstance()
-        calcSetMonthDiagram(calendar)
+        calcSetMonthDiagram(calendar)    // показывает диаграмму за месяц по умолчанию
+
+
+        buttonToEnterDateOnListView()      // выбор даты для листа
+
+        buttonToSetCardOnListView()      // выбор карты для листа
+
+        calcSetAllCardsList()             // выбирает все финансы по умолчанию
+
+        calcSetAllList()              // показывает лист за все время по умолчанию
+
 
         return binding.root
     }
@@ -860,11 +878,468 @@ class AnaliticsFragment : Fragment() {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
-            //TODO(ДОПИСАТЬ ПЕРЕХОД НА ДРУГОЙ ФРАГМЕНТ)
+            binding.viewflipper.showNext()
+
+        }
+
+        binding.constraintLayoutSetDiagram.setOnClickListener{
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            binding.viewflipper.showPrevious()
 
         }
 
     }
 
+
+
+    private fun buttonToSetCardOnListView(){
+
+        // параметры анимации нажатия
+        val buttonClick1 = AlphaAnimation(1f, 0.7f)
+        buttonClick1.duration = 160
+        buttonClick1.fillAfter = false
+        val buttonClick2 = AlphaAnimation(0.7f, 1f)
+        buttonClick2.duration = 50
+        buttonClick2.fillAfter = true
+        buttonClick2.startOffset = 70
+
+        binding.constraintLayoutSetCard.setOnClickListener{
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            showDialogSetCardOnListView()
+
+        }
+
+    }
+
+    private fun showDialogSetCardOnListView() {
+
+        dialogSetCardOnListView = DialogSetCardBinding.inflate(layoutInflater)
+        dialog = Dialog(this.activity!!)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setContentView(dialogSetCardOnListView.root)
+        dialog.setCancelable(true)
+
+        // параметры анимации нажатия
+        val buttonClick1 = AlphaAnimation(1f, 0.7f)
+        buttonClick1.duration = 160
+        buttonClick1.fillAfter = false
+        val buttonClick2 = AlphaAnimation(0.7f, 1f)
+        buttonClick2.duration = 50
+        buttonClick2.fillAfter = true
+        buttonClick2.startOffset = 70
+
+        dialogSetCardOnListView.textViewCard.setOnClickListener{
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetCardList()
+
+            dialog.dismiss()
+
+        }
+
+        dialogSetCardOnListView.textViewWallet.setOnClickListener {
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetWalletList()
+
+            dialog.dismiss()
+
+        }
+
+        dialogSetCardOnListView.textViewBank.setOnClickListener {
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetBankList()
+
+            dialog.dismiss()
+
+        }
+
+        dialogSetCardOnListView.textViewAll.setOnClickListener {
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetAllCardsList()
+
+            dialog.dismiss()
+
+        }
+
+        hidingPanel(dialog)
+        dialog.show()
+
+    }
+
+    private fun calcSetAllCardsList() {
+
+        binding.imageViewCard.visibility = View.GONE
+        binding.textViewCard.visibility = View.VISIBLE
+
+    }
+
+    private fun calcSetBankList() {
+
+        binding.imageViewCard.visibility = View.VISIBLE
+        binding.textViewCard.visibility = View.GONE
+
+        binding.imageViewCard2.setImageResource(R.drawable.account_balance)
+
+    }
+
+    private fun calcSetWalletList() {
+
+        binding.imageViewCard.visibility = View.VISIBLE
+        binding.textViewCard.visibility = View.GONE
+
+        binding.imageViewCard2.setImageResource(R.drawable.wallet)
+
+    }
+
+    private fun calcSetCardList() {
+
+        binding.imageViewCard.visibility = View.VISIBLE
+        binding.textViewCard.visibility = View.GONE
+
+        binding.imageViewCard2.setImageResource(R.drawable.credit_card)
+
+    }
+
+    private fun buttonToEnterDateOnListView(){
+
+        // параметры анимации нажатия
+        val buttonClick1 = AlphaAnimation(1f, 0.7f)
+        buttonClick1.duration = 160
+        buttonClick1.fillAfter = false
+        val buttonClick2 = AlphaAnimation(0.7f, 1f)
+        buttonClick2.duration = 50
+        buttonClick2.fillAfter = true
+        buttonClick2.startOffset = 70
+
+        binding.constraintLayoutDateList.setOnClickListener{
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            showDialogEnterDateOnListView()
+
+        }
+
+    }
+
+    private fun showDialogEnterDateOnListView() {
+
+        dialogSetDateOnListView = DialogSetDateListBinding.inflate(layoutInflater)
+        dialog = Dialog(this.activity!!)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setContentView(dialogSetDateOnListView.root)
+        dialog.setCancelable(true)
+
+        // параметры анимации нажатия
+        val buttonClick1 = AlphaAnimation(1f, 0.7f)
+        buttonClick1.duration = 160
+        buttonClick1.fillAfter = false
+        val buttonClick2 = AlphaAnimation(0.7f, 1f)
+        buttonClick2.duration = 50
+        buttonClick2.fillAfter = true
+        buttonClick2.startOffset = 70
+
+        dialogSetDateOnListView.textViewWeek.setOnClickListener{
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetWeekList()
+
+            dialog.dismiss()
+
+        }
+
+        dialogSetDateOnListView.textViewMonth.setOnClickListener {
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetMonthList()
+
+            dialog.dismiss()
+
+        }
+
+        dialogSetDateOnListView.textViewYear.setOnClickListener {
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetYearList()
+
+            dialog.dismiss()
+
+        }
+
+        dialogSetDateOnListView.textViewAll.setOnClickListener {
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            calcSetAllList()
+
+            dialog.dismiss()
+
+        }
+
+        dialogSetDateOnListView.textViewAnother.setOnClickListener{
+
+            it.startAnimation(buttonClick1)
+            it.startAnimation(buttonClick2)
+            it.visibility = View.VISIBLE
+
+            dialog.dismiss()
+
+            calcSetAnotherList()
+
+        }
+
+        hidingPanel(dialog)
+        dialog.show()
+
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun calcSetAnotherList() {
+
+        dialogSetDateDatepicker = DialogSetDateDatepickerBinding.inflate(layoutInflater)
+        dialog = Dialog(this.activity!!)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setContentView(dialogSetDateDatepicker.root)
+        dialog.setCancelable(true)
+
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
+        var dateFromTemp = Calendar.getInstance()
+        dateFromTemp.set(Calendar.HOUR_OF_DAY, 0)
+        dateFromTemp.set(Calendar.MINUTE, 0)
+        dateFromTemp.set(Calendar.SECOND, 0)
+
+        var dateToTemp = Calendar.getInstance()
+        dateToTemp.set(Calendar.HOUR_OF_DAY, 23)
+        dateToTemp.set(Calendar.MINUTE, 59)
+        dateToTemp.set(Calendar.SECOND, 59)
+
+        val calendar = Calendar.getInstance()
+        val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
+            true -> {
+                arrayOf(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+            else ->{
+                arrayOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+        }
+
+        when (dateFromTemp.get(Calendar.DAY_OF_MONTH) != 1){
+            true -> {
+                dateFromTemp.set(Calendar.DAY_OF_MONTH, dateToTemp.get(Calendar.DAY_OF_MONTH) - 1)
+            }
+            else -> {
+                var month = dateFromTemp.get(Calendar.MONTH) - 1
+                var year = dateFromTemp.get(Calendar.YEAR)
+                if (month == -1) {
+                    month = 11
+                    year -= 1
+                }
+                dateFromTemp.set(Calendar.MONTH, month)
+                dateFromTemp.set(Calendar.YEAR, year)
+                dateFromTemp.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month])
+            }
+        }
+
+        dialogSetDateDatepicker.enterDataFrom.text = "От: ${dateFormat.format(dateFromTemp.time)}"
+        dialogSetDateDatepicker.enterDataTo.text = "До: ${dateFormat.format(dateToTemp.time)}"
+
+        dialogSetDateDatepicker.enterDataFrom.setOnClickListener{
+
+            dateFromTemp = showDataTimePickerWithMax(dateToTemp.timeInMillis, dateFromTemp)
+
+        }
+
+        dialogSetDateDatepicker.enterDataTo.setOnClickListener{
+
+            dateToTemp = showDataTimePickerWithMin(dateFromTemp.timeInMillis, dateToTemp)
+
+        }
+
+        dialogSetDateDatepicker.dialogBtn.setOnClickListener{
+
+            val dateFormatDiagram = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+            calcListViewWithDate(dateFormatDiagram.format(dateFromTemp.time),
+                        dateFormatDiagram.format(dateToTemp.time))
+
+            dialog.dismiss()
+
+        }
+
+        hidingPanel(dialog)
+        dialog.show()
+    }
+
+    private fun calcSetAllList() {
+        calcListViewAllItems()
+    }
+
+    private fun calcSetYearList() {
+
+        val dateFrom = "${Calendar.getInstance().get(Calendar.YEAR)}-01-01 00:00:00"
+        val dateTo = "${Calendar.getInstance().get(Calendar.YEAR)}-12-31 23:59:59"
+
+        calcListViewWithDate(dateFrom, dateTo)
+
+    }
+
+    private fun calcSetMonthList() {
+
+        val calendar = Calendar.getInstance()
+
+        val month = calendar.get(Calendar.MONTH)
+        val arrayOfMonths = when (calendar.get(Calendar.YEAR) % 4 == 0) {
+            true -> {
+                arrayOf(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+            else ->{
+                arrayOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            }
+        }
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val resetDay = when (arrayOfMonths[month] <
+                (pref.getInt(getString(R.string.setDateDay), 0) + 1)){
+            true -> arrayOfMonths[month]
+            else -> (pref.getInt(getString(R.string.setDateDay), 0) + 1)
+        }
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.DAY_OF_MONTH, resetDay)
+
+        val dateFrom = dateFormat.format(calendar.time)          // дата "от"
+
+
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        when (month < 11){
+            true -> {
+                if (resetDay - 1 == 0){
+                    calendar.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month])
+                }
+                else if (resetDay - 1 >= arrayOfMonths[month + 1]){
+                    calendar.set(Calendar.DAY_OF_MONTH, (arrayOfMonths[month + 1] - 1))
+                    calendar.set(Calendar.MONTH, (month + 1))
+                }
+                else {
+                    calendar.set(Calendar.DAY_OF_MONTH, (resetDay - 1))
+                    calendar.set(Calendar.MONTH, (month + 1))
+                }
+            }
+            else -> {
+                if (resetDay - 1 == 0){
+                    calendar.set(Calendar.DAY_OF_MONTH, arrayOfMonths[month])
+                }
+                else if (resetDay - 1 >= arrayOfMonths[0]){
+                    calendar.set(Calendar.DAY_OF_MONTH, (arrayOfMonths[0] - 1))
+                    calendar.set(Calendar.MONTH, 0)
+                    calendar.set(Calendar.YEAR, (calendar.get(Calendar.YEAR) + 1))
+                }
+                else {
+                    calendar.set(Calendar.DAY_OF_MONTH, (resetDay - 1))
+                    calendar.set(Calendar.MONTH, 0)
+                    calendar.set(Calendar.YEAR, (calendar.get(Calendar.YEAR) + 1))
+                }
+            }
+        }
+        val dateTo = dateFormat.format(calendar.time)           // дата "до"
+
+        if (resetDay == 1) {
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.DAY_OF_MONTH, resetDay)
+            when (month < 11) {
+                true -> calendar.set(Calendar.MONTH, (month + 1))
+                else -> {
+                    calendar.set(Calendar.MONTH, 0)
+                    calendar.set(Calendar.YEAR, (calendar.get(Calendar.YEAR) + 1))
+                }
+            }
+        }
+
+        calcListViewWithDate(dateFrom, dateTo)
+
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun calcSetWeekList() {
+
+        val calendarDate = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("EEEE")
+        var dayOfTheWeek = dateFormat.format(calendarDate.time)   // день недели строкой
+
+        while (dayOfTheWeek != "понедельник"){      // в итоге получим дату ближайшего понедельника
+            calendarDate.set(Calendar.DAY_OF_MONTH, (calendarDate.get(Calendar.DAY_OF_MONTH) - 1))
+            dayOfTheWeek = dateFormat.format(calendarDate.time)
+        }
+
+        val dateFormatDiagram = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+        calendarDate.set(Calendar.HOUR_OF_DAY, 0)
+        calendarDate.set(Calendar.MINUTE, 0)
+        calendarDate.set(Calendar.SECOND, 0)
+        val dateFrom = dateFormatDiagram.format(calendarDate.time)
+
+        calendarDate.set(Calendar.DAY_OF_MONTH, (calendarDate.get(Calendar.DAY_OF_MONTH) + 6))
+        calendarDate.set(Calendar.HOUR_OF_DAY, 23)
+        calendarDate.set(Calendar.MINUTE, 59)
+        calendarDate.set(Calendar.SECOND, 59)
+        val dateTo = dateFormatDiagram.format(calendarDate.time)
+
+        calcListViewWithDate(dateFrom, dateTo)
+
+    }
+
+    private fun calcListViewWithDate(dateFrom: String, dateTo: String){
+
+        // TODO (показывает элементы и сумму по выбранной дате + смотрит на выбранную карту на экране)
+
+    }
+
+    private fun calcListViewAllItems(){
+
+        // TODO (показывает все элементы и сумму за все время + смотрит на выбранную карту на экране)
+
+    }
 
 }
