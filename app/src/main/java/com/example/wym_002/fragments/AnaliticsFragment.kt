@@ -7,11 +7,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.*
 import android.view.animation.AlphaAnimation
-import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import app.com.kotlinapp.OnSwipeTouchListener
 import com.example.wym_002.R
@@ -25,6 +23,7 @@ import com.example.wym_002.hidingPanel
 import org.eazegraph.lib.models.PieModel
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.properties.Delegates
 
 
 class AnaliticsFragment : Fragment() {
@@ -41,6 +40,8 @@ class AnaliticsFragment : Fragment() {
     lateinit var db: MainDb
 
     lateinit var pref: SharedPreferences
+
+    private var getCardFromCalcList = "all"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -80,13 +81,15 @@ class AnaliticsFragment : Fragment() {
         calcSetMonthDiagram(calendar)    // показывает диаграмму за месяц по умолчанию
 
 
+
         buttonToEnterDateOnListView()      // выбор даты для листа
 
-        buttonToSetCardOnListView()      // выбор карты для листа
+        buttonToSetCardOnListView("all", "all")      // выбор карты для листа (за все время)
 
         calcSetAllCardsList()             // выбирает все финансы по умолчанию
 
         calcSetAllList()              // показывает лист за все время по умолчанию
+
 
 
         return binding.root
@@ -354,13 +357,17 @@ class AnaliticsFragment : Fragment() {
 
             val dateFormatDiagram = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
+            lateinit var totalSpends: String
+
             val threadTotalSpends = Thread {
-                binding.textViewTotalSpend2.text = db.getDao().getSumByDate(
+                totalSpends = db.getDao().getSumByDate(
                     dateFormatDiagram.format(dateFromTemp.time),
                     dateFormatDiagram.format(dateToTemp.time)).toString()
             }
             threadTotalSpends.start()
             threadTotalSpends.join()
+
+            binding.textViewTotalSpend2.text = totalSpends
 
             calcDiagram(dateFormatDiagram.format(dateFromTemp.time),
                         dateFormatDiagram.format(dateToTemp.time),
@@ -548,11 +555,15 @@ class AnaliticsFragment : Fragment() {
         calendarDate.set(Calendar.SECOND, 59)
         val dateTo = dateFormatDiagram.format(calendarDate.time)
 
+        lateinit var totalSpends: String
+
         val threadTotalSpends = Thread {
-            binding.textViewTotalSpend2.text = db.getDao().getSumByDate(dateFrom, dateTo).toString()
+            totalSpends = db.getDao().getSumByDate(dateFrom, dateTo).toString()
         }
         threadTotalSpends.start()
         threadTotalSpends.join()
+
+        binding.textViewTotalSpend2.text = totalSpends
 
         calcDiagram(dateFrom, dateTo, dateFrom, dateTo)
 
@@ -623,17 +634,25 @@ class AnaliticsFragment : Fragment() {
     @SuppressLint("ResourceType")
     private fun calcDiagram(dateFrom: String, dateTo: String, dateSavingFrom: String, dateSavingTo: String) {
 
+        lateinit var totalSpends: String
+
         val threadTotalSpends = Thread {
-            binding.textViewTotalSpend.text = db.getDao().getSumByDate(dateFrom, dateTo).toString()
+            totalSpends = db.getDao().getSumByDate(dateFrom, dateTo).toString()
         }
         threadTotalSpends.start()
         threadTotalSpends.join()
 
+        binding.textViewTotalSpend.text = totalSpends
+
+        lateinit var totalSaving: String
+
         val threadSaving = Thread {
-            binding.textViewSaveSpend.text = db.getDao().getSavingByDate(dateSavingFrom, dateSavingTo).toString()
+            totalSaving = db.getDao().getSavingByDate(dateSavingFrom, dateSavingTo).toString()
         }
         threadSaving.start()
         threadSaving.join()
+
+        binding.textViewSaveSpend.text = totalSaving
 
         binding.piechart.clearChart()       // чтобы не накладывал на предыдущее
 
@@ -645,141 +664,135 @@ class AnaliticsFragment : Fragment() {
             binding.textViewYear.setTextColor(Color.parseColor(getString(R.color.secondaryWhite)))
             binding.textViewYear2.setTextColor(Color.parseColor(getString(R.color.secondaryWhite)))
 
+            var calcValueFloat by Delegates.notNull<Float>()
+
+            var houseValue by Delegates.notNull<Int>()
+
             val threadHouse = Thread {
-
-                val houseValue = db.getDao().getSumWithCategoryByDate(getString(R.string.house), dateFrom, dateTo)
-                val calcValueFloat = (houseValue * 100F) / totalSpend
-
-                binding.textViewHouseSum.text = houseValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "house", calcValueFloat,
-                        Color.parseColor(getString(R.color.house))
-                    )
-                )
+                houseValue = db.getDao().getSumWithCategoryByDate(getString(R.string.house), dateFrom, dateTo)
+                calcValueFloat = (houseValue * 100F) / totalSpend
             }
             threadHouse.start()
             threadHouse.join()
+            binding.textViewHouseSum.text = houseValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "house", calcValueFloat,
+                    Color.parseColor(getString(R.color.house))
+                )
+            )
+
+            var busValue by Delegates.notNull<Int>()
 
             val threadBus = Thread {
-
-                val busValue = db.getDao().getSumWithCategoryByDate(getString(R.string.bus), dateFrom, dateTo)
-                val calcValueFloat = (busValue * 100F) / totalSpend
-
-                binding.textViewBusSum.text = busValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "bus", calcValueFloat,
-                        Color.parseColor(getString(R.color.bus))
-                    )
-                )
+                busValue = db.getDao().getSumWithCategoryByDate(getString(R.string.bus), dateFrom, dateTo)
+                calcValueFloat = (busValue * 100F) / totalSpend
             }
             threadBus.start()
             threadBus.join()
+            binding.textViewBusSum.text = busValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "bus", calcValueFloat,
+                    Color.parseColor(getString(R.color.bus))
+                )
+            )
+
+            var foodHouseValue by Delegates.notNull<Int>()
 
             val threadFoodHouse = Thread {
-
-                val foodHouseValue = db.getDao().getSumWithCategoryByDate(getString(R.string.food_house), dateFrom, dateTo)
-                val calcValueFloat = (foodHouseValue * 100F) / totalSpend
-
-                binding.textViewFoodHouseSum.text = foodHouseValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "foodHouse", calcValueFloat,
-                        Color.parseColor(getString(R.color.food_house))
-                    )
-                )
+                foodHouseValue = db.getDao().getSumWithCategoryByDate(getString(R.string.food_house), dateFrom, dateTo)
+                calcValueFloat = (foodHouseValue * 100F) / totalSpend
             }
             threadFoodHouse.start()
             threadFoodHouse.join()
+            binding.textViewFoodHouseSum.text = foodHouseValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "foodHouse", calcValueFloat,
+                    Color.parseColor(getString(R.color.food_house))
+                )
+            )
+
+            var healthValue by Delegates.notNull<Int>()
 
             val threadHealth = Thread {
-
-                val healthValue = db.getDao().getSumWithCategoryByDate(getString(R.string.health), dateFrom, dateTo)
-                val calcValueFloat = (healthValue * 100F) / totalSpend
-
-                binding.textViewHealthSum.text = healthValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "health", calcValueFloat,
-                        Color.parseColor(getString(R.color.health))
-                    )
-                )
+                healthValue = db.getDao().getSumWithCategoryByDate(getString(R.string.health), dateFrom, dateTo)
+                calcValueFloat = (healthValue * 100F) / totalSpend
             }
             threadHealth.start()
             threadHealth.join()
+            binding.textViewHealthSum.text = healthValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "health", calcValueFloat,
+                    Color.parseColor(getString(R.color.health))
+                )
+            )
+
+            var coffeeValue by Delegates.notNull<Int>()
 
             val threadCoffee = Thread {
-
-                val coffeeValue = db.getDao().getSumWithCategoryByDate(getString(R.string.coffee), dateFrom, dateTo)
-                val calcValueFloat = (coffeeValue * 100F) / totalSpend
-
-                binding.textViewCoffeeSum.text = coffeeValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "coffee", calcValueFloat,
-                        Color.parseColor(getString(R.color.coffee))
-                    )
-                )
+                coffeeValue = db.getDao().getSumWithCategoryByDate(getString(R.string.coffee), dateFrom, dateTo)
+                calcValueFloat = (coffeeValue * 100F) / totalSpend
             }
             threadCoffee.start()
             threadCoffee.join()
+            binding.textViewCoffeeSum.text = coffeeValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "coffee", calcValueFloat,
+                    Color.parseColor(getString(R.color.coffee))
+                )
+            )
+
+            var gamesValue by Delegates.notNull<Int>()
 
             val threadGames = Thread {
-
-                val gamesValue = db.getDao().getSumWithCategoryByDate(getString(R.string.games), dateFrom, dateTo)
-                val calcValueFloat = (gamesValue * 100F) / totalSpend
-
-                binding.textViewGamesSum.text = gamesValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "games", calcValueFloat,
-                        Color.parseColor(getString(R.color.games))
-                    )
-                )
+                gamesValue = db.getDao().getSumWithCategoryByDate(getString(R.string.games), dateFrom, dateTo)
+                calcValueFloat = (gamesValue * 100F) / totalSpend
             }
             threadGames.start()
             threadGames.join()
+            binding.textViewGamesSum.text = gamesValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "games", calcValueFloat,
+                    Color.parseColor(getString(R.color.games))
+                )
+            )
+
+            var clothesValue by Delegates.notNull<Int>()
 
             val threadClothes = Thread {
-
-                val clothesValue = db.getDao().getSumWithCategoryByDate(getString(R.string.clothes), dateFrom, dateTo)
-                val calcValueFloat = (clothesValue * 100F) / totalSpend
-
-                binding.textViewClothesSum.text = clothesValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "clothes", calcValueFloat,
-                        Color.parseColor(getString(R.color.clothes))
-                    )
-                )
+                clothesValue = db.getDao().getSumWithCategoryByDate(getString(R.string.clothes), dateFrom, dateTo)
+                calcValueFloat = (clothesValue * 100F) / totalSpend
             }
             threadClothes.start()
             threadClothes.join()
+            binding.textViewClothesSum.text = clothesValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "clothes", calcValueFloat,
+                    Color.parseColor(getString(R.color.clothes))
+                )
+            )
+
+            var anotherValue by Delegates.notNull<Int>()
 
             val threadAnother = Thread {
-
-                val anotherValue = db.getDao().getSumWithCategoryByDate(getString(R.string.another), dateFrom, dateTo)
-                val calcValueFloat = (anotherValue * 100F) / totalSpend
-
-                binding.textViewAnotherSum.text = anotherValue.toString()
-
-                binding.piechart.addPieSlice(
-                    PieModel(
-                        "another", calcValueFloat,
-                        Color.parseColor(getString(R.color.another))
-                    )
-                )
+                anotherValue = db.getDao().getSumWithCategoryByDate(getString(R.string.another), dateFrom, dateTo)
+                calcValueFloat = (anotherValue * 100F) / totalSpend
             }
             threadAnother.start()
             threadAnother.join()
+            binding.textViewAnotherSum.text = anotherValue.toString()
+            binding.piechart.addPieSlice(
+                PieModel(
+                    "another", calcValueFloat,
+                    Color.parseColor(getString(R.color.another))
+                )
+            )
 
         }
         else{
@@ -896,7 +909,7 @@ class AnaliticsFragment : Fragment() {
 
 
 
-    private fun buttonToSetCardOnListView(){
+    private fun buttonToSetCardOnListView(dateFrom: String, dateTo: String){
 
         // параметры анимации нажатия
         val buttonClick1 = AlphaAnimation(1f, 0.7f)
@@ -913,13 +926,13 @@ class AnaliticsFragment : Fragment() {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
-            showDialogSetCardOnListView()
+            showDialogSetCardOnListView(dateFrom, dateTo)
 
         }
 
     }
 
-    private fun showDialogSetCardOnListView() {
+    private fun showDialogSetCardOnListView(dateFrom: String, dateTo: String) {
 
         dialogSetCardOnListView = DialogSetCardBinding.inflate(layoutInflater)
         dialog = Dialog(this.activity!!)
@@ -944,6 +957,13 @@ class AnaliticsFragment : Fragment() {
 
             calcSetCardList()
 
+            if (dateFrom != "all" && dateTo != "all"){
+                calcListViewWithDate(dateFrom, dateTo)
+            }
+            else{
+                calcListViewAllItems()
+            }
+
             dialog.dismiss()
 
         }
@@ -955,6 +975,13 @@ class AnaliticsFragment : Fragment() {
             it.visibility = View.VISIBLE
 
             calcSetWalletList()
+
+            if (dateFrom != "all" && dateTo != "all"){
+                calcListViewWithDate(dateFrom, dateTo)
+            }
+            else{
+                calcListViewAllItems()
+            }
 
             dialog.dismiss()
 
@@ -968,6 +995,13 @@ class AnaliticsFragment : Fragment() {
 
             calcSetBankList()
 
+            if (dateFrom != "all" && dateTo != "all"){
+                calcListViewWithDate(dateFrom, dateTo)
+            }
+            else{
+                calcListViewAllItems()
+            }
+
             dialog.dismiss()
 
         }
@@ -979,6 +1013,13 @@ class AnaliticsFragment : Fragment() {
             it.visibility = View.VISIBLE
 
             calcSetAllCardsList()
+
+            if (dateFrom != "all" && dateTo != "all"){
+                calcListViewWithDate(dateFrom, dateTo)
+            }
+            else{
+                calcListViewAllItems()
+            }
 
             dialog.dismiss()
 
@@ -994,6 +1035,8 @@ class AnaliticsFragment : Fragment() {
         binding.imageViewCard.visibility = View.GONE
         binding.textViewCard.visibility = View.VISIBLE
 
+        getCardFromCalcList = "all"
+
     }
 
     private fun calcSetBankList() {
@@ -1002,6 +1045,8 @@ class AnaliticsFragment : Fragment() {
         binding.textViewCard.visibility = View.GONE
 
         binding.imageViewCard2.setImageResource(R.drawable.account_balance)
+
+        getCardFromCalcList = "account"
 
     }
 
@@ -1012,6 +1057,8 @@ class AnaliticsFragment : Fragment() {
 
         binding.imageViewCard2.setImageResource(R.drawable.wallet)
 
+        getCardFromCalcList = "wallet"
+
     }
 
     private fun calcSetCardList() {
@@ -1020,6 +1067,8 @@ class AnaliticsFragment : Fragment() {
         binding.textViewCard.visibility = View.GONE
 
         binding.imageViewCard2.setImageResource(R.drawable.credit_card)
+
+        getCardFromCalcList = "card"
 
     }
 
@@ -1332,13 +1381,70 @@ class AnaliticsFragment : Fragment() {
 
     private fun calcListViewWithDate(dateFrom: String, dateTo: String){
 
-        // TODO (показывает элементы и сумму по выбранной дате + смотрит на выбранную карту на экране)
+        // TODO (показывает элементы по выбранной дате + смотрит на выбранную карту на экране)
+
+        buttonToSetCardOnListView(dateFrom, dateTo)
+
+        lateinit var spendRes: String
+
+        val threadTotalSpendsList = Thread {
+
+        // вывод суммы трат с выбранной картой и датой либо по всем картам и с датой
+            spendRes = when (getCardFromCalcList){
+                "card" -> {
+                    db.getDao().getSumByDateWithCards(dateFrom, dateTo, "card").toString()
+                }
+                "wallet" -> {
+                    db.getDao().getSumByDateWithCards(dateFrom, dateTo, "wallet").toString()
+                }
+                "account" -> {
+                    db.getDao().getSumByDateWithCards(dateFrom, dateTo, "account").toString()
+                }
+                else ->{
+                    db.getDao().getSumByDate(dateFrom, dateTo).toString()
+                }
+            }
+
+        }
+        threadTotalSpendsList.start()
+        threadTotalSpendsList.join()
+
+        binding.textViewTotalSpendList.text = spendRes
 
     }
 
     private fun calcListViewAllItems(){
 
-        // TODO (показывает все элементы и сумму за все время + смотрит на выбранную карту на экране)
+        // TODO (показывает все элементы за все время + смотрит на выбранную карту на экране)
+
+        buttonToSetCardOnListView("all", "all")
+
+        lateinit var spendRes: String
+
+        val threadTotalSpendsList = Thread {
+
+        // вывод суммы трат с выбранной картой и по всем картам за все время
+            spendRes = when (getCardFromCalcList){
+                "card" -> {
+                    db.getDao().getSumByAllDateWithCards("card").toString()
+                }
+                "wallet" -> {
+                    db.getDao().getSumByAllDateWithCards("wallet").toString()
+
+                }
+                "account" -> {
+                    db.getDao().getSumByAllDateWithCards("account").toString()
+                }
+                else ->{
+                    db.getDao().getSumByAllDateWithAllCards().toString()
+                }
+            }
+
+        }
+        threadTotalSpendsList.start()
+        threadTotalSpendsList.join()
+
+        binding.textViewTotalSpendList.text = spendRes
 
     }
 

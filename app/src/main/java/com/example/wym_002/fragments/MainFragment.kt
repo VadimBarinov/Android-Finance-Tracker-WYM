@@ -4,10 +4,12 @@ package com.example.wym_002.fragments
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
+import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
 import android.view.animation.AlphaAnimation
@@ -843,6 +845,11 @@ class MainFragment : Fragment() {
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun calcProgressBarPlus(res: Int){
         val textDate = calcDate(Calendar.getInstance())    // формируется ключ
+
+        lateinit var pbMain: Drawable
+        lateinit var pbSecondary: Drawable
+        lateinit var pbSaving: Drawable
+
         val thread = Thread{
             val resTotal = when (db.getDao().getBudgetData(textDate)) {
                 null -> 0
@@ -870,15 +877,19 @@ class MainFragment : Fragment() {
             saveData("secondColor", R.drawable.custom_progress_bar)
             saveData("savingColor", R.drawable.custom_progress_bar2)
 
-            binding.progressBarMain.progressDrawable = resources.getDrawable(
+            pbMain = resources.getDrawable(
                 pref.getInt("mainColor", R.drawable.custom_progress_bar))
-            binding.progressBarSecondary.progressDrawable = resources.getDrawable(
+            pbSecondary = resources.getDrawable(
                 pref.getInt("secondColor", R.drawable.custom_progress_bar))
-            binding.progressBarSaving.progressDrawable = resources.getDrawable(
+            pbSaving = resources.getDrawable(
                 pref.getInt("savingColor", R.drawable.custom_progress_bar2))
         }
         thread.start()
         thread.join()
+
+        binding.progressBarMain.progressDrawable = pbMain
+        binding.progressBarSecondary.progressDrawable = pbSecondary
+        binding.progressBarSaving.progressDrawable = pbSaving
 
     }
 
