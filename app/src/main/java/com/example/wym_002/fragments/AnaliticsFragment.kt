@@ -149,7 +149,7 @@ class AnaliticsFragment : Fragment() {
 
         }
 
-        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {
+        binding.constraintLayotDiagram.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
                 setCurrentMonthForward(calendar)
@@ -177,7 +177,7 @@ class AnaliticsFragment : Fragment() {
 
         binding.imageViewBack.setOnClickListener{}
 
-        binding.root.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {})
+        binding.constraintLayotDiagram.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {})
 
     }
 
