@@ -4,7 +4,6 @@ package com.example.wym_002.fragments
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
-import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point

@@ -11,7 +11,11 @@ import android.os.Bundle
 import android.view.*
 import android.view.animation.AlphaAnimation
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
 import app.com.kotlinapp.OnSwipeTouchListener
+import com.example.wym_002.ItemAdapter
+import com.example.wym_002.ItemDataClass
 import com.example.wym_002.R
 import com.example.wym_002.databinding.DialogSetCardBinding
 import com.example.wym_002.databinding.DialogSetDateBinding
@@ -42,6 +46,8 @@ class AnaliticsFragment : Fragment() {
     lateinit var pref: SharedPreferences
 
     private var getCardFromCalcList = "all"
+
+    private val adapter = ItemAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,6 +89,8 @@ class AnaliticsFragment : Fragment() {
 
 
         buttonToEnterDateOnListView()      // выбор даты для листа
+
+        getCardFromCalcList = "all"
 
         buttonToSetCardOnListView("all", "all")      // выбор карты для листа (за все время)
 
@@ -1381,9 +1389,107 @@ class AnaliticsFragment : Fragment() {
 
     private fun calcListViewWithDate(dateFrom: String, dateTo: String){
 
-        // TODO (показывает элементы по выбранной дате + смотрит на выбранную карту на экране)
+        // TODO (при нажатии на элемент появляется диалог)
 
         buttonToSetCardOnListView(dateFrom, dateTo)
+
+        binding.rcView.layoutManager = LinearLayoutManager(this.activity!!)
+        binding.rcView.adapter = adapter
+
+        adapter.clearItemList()
+
+        when (getCardFromCalcList != "all"){
+            true -> {
+                db.getDao().getItemsByDateWithSelectedCard(dateFrom, dateTo, getCardFromCalcList)
+                    .asLiveData().observe(this.activity!!){
+
+                        it.forEach{ it1 ->
+
+                            val iconCat = when (it1.category){
+
+                                getString(R.string.house) -> { R.drawable.house_diagram }
+                                getString(R.string.bus) -> { R.drawable.bus_diagram }
+                                getString(R.string.food_house) -> { R.drawable.food_house_diagram }
+                                getString(R.string.health) -> { R.drawable.health_diagram }
+                                getString(R.string.coffee) -> { R.drawable.coffee_diagram }
+                                getString(R.string.games) -> { R.drawable.games_diagram }
+                                getString(R.string.clothes) -> { R.drawable.clothes_diagram }
+                                else -> { R.drawable.another_diagram }
+
+                            }
+
+                            val cardIcon = when (it1.card){
+
+                                "card" -> { R.drawable.credit_card }
+                                "wallet" -> { R.drawable.wallet }
+                                else -> { R.drawable.account_balance }
+
+                            }
+
+                            // 16.12.2023 13:35
+                            val dateList = "${it1.data[8]}${it1.data[9]}." +
+                                    "${it1.data[5]}${it1.data[6]}." +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
+
+                            val item = ItemDataClass(iconCat,
+                                it1.category,
+                                it1.spend,
+                                dateList,
+                                it1.amount,
+                                cardIcon)
+
+                            adapter.addItemInList(item)
+                        }
+
+                    }
+            }
+            else ->{
+                db.getDao().getItemsByDateWithAllCards(dateFrom, dateTo)
+                    .asLiveData().observe(this.activity!!){
+
+                        it.forEach{ it1 ->
+
+                            val iconCat = when (it1.category){
+
+                                getString(R.string.house) -> { R.drawable.house_diagram }
+                                getString(R.string.bus) -> { R.drawable.bus_diagram }
+                                getString(R.string.food_house) -> { R.drawable.food_house_diagram }
+                                getString(R.string.health) -> { R.drawable.health_diagram }
+                                getString(R.string.coffee) -> { R.drawable.coffee_diagram }
+                                getString(R.string.games) -> { R.drawable.games_diagram }
+                                getString(R.string.clothes) -> { R.drawable.clothes_diagram }
+                                else -> { R.drawable.another_diagram }
+
+                            }
+
+                            val cardIcon = when (it1.card){
+
+                                "card" -> { R.drawable.credit_card }
+                                "wallet" -> { R.drawable.wallet }
+                                else -> { R.drawable.account_balance }
+
+                            }
+
+                            // 16.12.2023 13:35
+                            val dateList = "${it1.data[8]}${it1.data[9]}." +
+                                    "${it1.data[5]}${it1.data[6]}." +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
+
+                            val item = ItemDataClass(iconCat,
+                                it1.category,
+                                it1.spend,
+                                dateList,
+                                it1.amount,
+                                cardIcon)
+
+                            adapter.addItemInList(item)
+                        }
+
+                    }
+            }
+        }
 
         lateinit var spendRes: String
 
@@ -1415,9 +1521,109 @@ class AnaliticsFragment : Fragment() {
 
     private fun calcListViewAllItems(){
 
-        // TODO (показывает все элементы за все время + смотрит на выбранную карту на экране)
+        // TODO (при нажатии на элемент появляется диалог)
 
         buttonToSetCardOnListView("all", "all")
+
+
+        binding.rcView.layoutManager = LinearLayoutManager(this.activity!!)
+        binding.rcView.adapter = adapter
+
+        adapter.clearItemList()
+
+        when (getCardFromCalcList != "all"){
+            true -> {
+                db.getDao().getItemsByAllDateWithSelectedCard(getCardFromCalcList)
+                    .asLiveData().observe(this.activity!!){
+
+                        it.forEach{ it1 ->
+
+                            val iconCat = when (it1.category){
+
+                                getString(R.string.house) -> { R.drawable.house_diagram }
+                                getString(R.string.bus) -> { R.drawable.bus_diagram }
+                                getString(R.string.food_house) -> { R.drawable.food_house_diagram }
+                                getString(R.string.health) -> { R.drawable.health_diagram }
+                                getString(R.string.coffee) -> { R.drawable.coffee_diagram }
+                                getString(R.string.games) -> { R.drawable.games_diagram }
+                                getString(R.string.clothes) -> { R.drawable.clothes_diagram }
+                                else -> { R.drawable.another_diagram }
+
+                            }
+
+                            val cardIcon = when (it1.card){
+
+                                "card" -> { R.drawable.credit_card }
+                                "wallet" -> { R.drawable.wallet }
+                                else -> { R.drawable.account_balance }
+
+                            }
+
+                            // 16.12.2023 13:35
+                            val dateList = "${it1.data[8]}${it1.data[9]}." +
+                                    "${it1.data[5]}${it1.data[6]}." +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
+
+                            val item = ItemDataClass(iconCat,
+                                it1.category,
+                                it1.spend,
+                                dateList,
+                                it1.amount,
+                                cardIcon)
+
+                            adapter.addItemInList(item)
+                        }
+
+                    }
+            }
+            else ->{
+                db.getDao().getAllItemsWithAllCards()
+                    .asLiveData().observe(this.activity!!){
+
+                        it.forEach{ it1 ->
+
+                            val iconCat = when (it1.category){
+
+                                getString(R.string.house) -> { R.drawable.house_diagram }
+                                getString(R.string.bus) -> { R.drawable.bus_diagram }
+                                getString(R.string.food_house) -> { R.drawable.food_house_diagram }
+                                getString(R.string.health) -> { R.drawable.health_diagram }
+                                getString(R.string.coffee) -> { R.drawable.coffee_diagram }
+                                getString(R.string.games) -> { R.drawable.games_diagram }
+                                getString(R.string.clothes) -> { R.drawable.clothes_diagram }
+                                else -> { R.drawable.another_diagram }
+
+                            }
+
+                            val cardIcon = when (it1.card){
+
+                                "card" -> { R.drawable.credit_card }
+                                "wallet" -> { R.drawable.wallet }
+                                else -> { R.drawable.account_balance }
+
+                            }
+
+                            // 16.12.2023 13:35
+                            val dateList = "${it1.data[8]}${it1.data[9]}." +
+                                    "${it1.data[5]}${it1.data[6]}." +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
+
+                            val item = ItemDataClass(iconCat,
+                                it1.category,
+                                it1.spend,
+                                dateList,
+                                it1.amount,
+                                cardIcon)
+
+                            adapter.addItemInList(item)
+                        }
+
+                    }
+            }
+        }
+
 
         lateinit var spendRes: String
 
