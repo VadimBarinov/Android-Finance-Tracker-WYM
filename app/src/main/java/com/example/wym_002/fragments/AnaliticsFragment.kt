@@ -43,6 +43,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
     lateinit var pref: SharedPreferences
 
     private var getCardFromCalcList = "all"
+    private var getDateFromDiagram = "month"
+    private var getDateFromList = "all"
 
     private val adapter = ItemAdapter(this)
 
@@ -77,6 +79,9 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         // deleteDateLast                   key: getString(R.string.deleteDateLast)
 
         buttonToSetList()       // меняет экраны
+
+        getDateFromDiagram = "month"
+        getDateFromList = "all"
 
         buttonToEnterDate()       // выбор даты для диаграммы
 
@@ -210,6 +215,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
     }
 
+    @SuppressLint("ResourceType")
     private fun showDialogEnterDate() {
 
         dialogSetDate = DialogSetDateBinding.inflate(layoutInflater)
@@ -217,6 +223,19 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogSetDate.root)
         dialog.setCancelable(true)
+
+        dialogSetDate.textViewWeek.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+        dialogSetDate.textViewMonth.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+        dialogSetDate.textViewYear.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+        dialogSetDate.textViewAnother.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+
+        when (getDateFromDiagram) {
+            "week" -> dialogSetDate.textViewWeek.setTextColor(Color.parseColor(getString(R.color.backColor)))
+            "month" -> dialogSetDate.textViewMonth.setTextColor(Color.parseColor(getString(R.color.backColor)))
+            "year" -> dialogSetDate.textViewYear.setTextColor(Color.parseColor(getString(R.color.backColor)))
+            else -> dialogSetDate.textViewAnother.setTextColor(Color.parseColor(getString(R.color.backColor)))
+
+        }
 
         // параметры анимации нажатия
         val buttonClick1 = AlphaAnimation(1f, 0.7f)
@@ -233,6 +252,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
+            getDateFromDiagram = "week"
+
             calcSetWeekDiagram()
 
             dialog.dismiss()
@@ -244,6 +265,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick1)
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
+
+            getDateFromDiagram = "month"
 
             calcSetMonthDiagram(Calendar.getInstance())
 
@@ -257,6 +280,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
+            getDateFromDiagram = "year"
+
             calcSetYearDiagram()
 
             dialog.dismiss()
@@ -268,6 +293,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick1)
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
+
+            getDateFromDiagram = "another"
 
             dialog.dismiss()
 
@@ -1100,6 +1127,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
     }
 
+    @SuppressLint("ResourceType")
     private fun showDialogEnterDateOnListView() {
 
         dialogSetDateOnListView = DialogSetDateListBinding.inflate(layoutInflater)
@@ -1107,6 +1135,21 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogSetDateOnListView.root)
         dialog.setCancelable(true)
+
+        dialogSetDateOnListView.textViewWeek.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+        dialogSetDateOnListView.textViewMonth.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+        dialogSetDateOnListView.textViewYear.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+        dialogSetDateOnListView.textViewAll.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+        dialogSetDateOnListView.textViewAnother.setTextColor(Color.parseColor(getString(R.color.greyWYM)))
+
+        when (getDateFromList) {
+            "week" -> dialogSetDateOnListView.textViewWeek.setTextColor(Color.parseColor(getString(R.color.backColor)))
+            "month" -> dialogSetDateOnListView.textViewMonth.setTextColor(Color.parseColor(getString(R.color.backColor)))
+            "year" -> dialogSetDateOnListView.textViewYear.setTextColor(Color.parseColor(getString(R.color.backColor)))
+            "all" -> dialogSetDateOnListView.textViewAll.setTextColor(Color.parseColor(getString(R.color.backColor)))
+            else -> dialogSetDateOnListView.textViewAnother.setTextColor(Color.parseColor(getString(R.color.backColor)))
+
+        }
 
         // параметры анимации нажатия
         val buttonClick1 = AlphaAnimation(1f, 0.7f)
@@ -1123,6 +1166,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
+            getDateFromList = "week"
+
             calcSetWeekList()
 
             dialog.dismiss()
@@ -1134,6 +1179,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick1)
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
+
+            getDateFromList = "month"
 
             calcSetMonthList()
 
@@ -1147,6 +1194,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
+            getDateFromList = "year"
+
             calcSetYearList()
 
             dialog.dismiss()
@@ -1159,6 +1208,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
 
+            getDateFromList = "all"
+
             calcSetAllList()
 
             dialog.dismiss()
@@ -1170,6 +1221,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             it.startAnimation(buttonClick1)
             it.startAnimation(buttonClick2)
             it.visibility = View.VISIBLE
+
+            getDateFromList = "another"
 
             dialog.dismiss()
 
@@ -1386,8 +1439,6 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
     private fun calcListViewWithDate(dateFrom: String, dateTo: String){
 
-        // TODO (при нажатии на элемент появляется диалог)
-
         buttonToSetCardOnListView(dateFrom, dateTo)
 
         binding.rcView.layoutManager = LinearLayoutManager(this.activity!!)
@@ -1517,8 +1568,6 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
     }
 
     private fun calcListViewAllItems(){
-
-        // TODO (при нажатии на элемент появляется диалог)
 
         buttonToSetCardOnListView("all", "all")
 
