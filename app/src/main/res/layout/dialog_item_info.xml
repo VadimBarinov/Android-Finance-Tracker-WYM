@@ -38,8 +38,8 @@
 
             <ImageView
                 android:id="@+id/imageViewIconCat"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_marginTop="20dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -66,30 +66,29 @@
                 android:fontFamily="@font/ubuntu"
                 android:text="5000"
                 android:textColor="@color/backColor"
-                android:textSize="28sp"
+                android:textSize="22sp"
                 app:layout_constraintStart_toStartOf="@+id/textView8"
                 app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
             <TextView
-                android:id="@+id/textViewSpend2"
+                android:id="@+id/textViewDate2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:fontFamily="@font/ubuntu"
                 android:text="07.12.2023    12:12"
                 android:textColor="@color/backColor"
-                android:textSize="28sp"
+                android:textSize="22sp"
                 app:layout_constraintStart_toStartOf="@+id/textView9"
                 app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
             <TextView
                 android:id="@+id/textViewCatInfo"
-                android:layout_width="320dp"
+                android:layout_width="400dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="40dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginEnd="40dp"
                 android:fontFamily="@font/ubuntu"
+                android:paddingHorizontal="80dp"
                 android:text="аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа аааааааааа"
                 android:textColor="@color/backColor"
                 android:textSize="20sp"
@@ -100,7 +99,7 @@
             <ImageView
                 android:id="@+id/imageViewCard"
                 android:layout_width="60dp"
-                android:layout_height="28dp"
+                android:layout_height="22dp"
                 android:layout_marginStart="20dp"
                 app:layout_constraintBottom_toBottomOf="@+id/textViewSpend"
                 app:layout_constraintStart_toEndOf="@+id/textViewSpend"
@@ -112,7 +111,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="40dp"
                 android:fontFamily="@font/ubuntu"
                 android:text="Ресурс списания"
                 android:textColor="@color/greyWYM"
@@ -139,7 +138,7 @@
                 android:text="Описание траты"
                 android:textColor="@color/greyWYM"
                 app:layout_constraintStart_toStartOf="@+id/textView9"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSpend2" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewDate2" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,11 +17,7 @@ import app.com.kotlinapp.OnSwipeTouchListener
 import com.example.wym_002.ItemAdapter
 import com.example.wym_002.ItemDataClass
 import com.example.wym_002.R
-import com.example.wym_002.databinding.DialogSetCardBinding
-import com.example.wym_002.databinding.DialogSetDateBinding
-import com.example.wym_002.databinding.DialogSetDateDatepickerBinding
-import com.example.wym_002.databinding.DialogSetDateListBinding
-import com.example.wym_002.databinding.FragmentAnaliticsFragmentBinding
+import com.example.wym_002.databinding.*
 import com.example.wym_002.db.MainDb
 import com.example.wym_002.hidingPanel
 import org.eazegraph.lib.models.PieModel
@@ -30,7 +26,7 @@ import java.util.*
 import kotlin.properties.Delegates
 
 
-class AnaliticsFragment : Fragment() {
+class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
     private lateinit var binding: FragmentAnaliticsFragmentBinding
 
@@ -40,6 +36,7 @@ class AnaliticsFragment : Fragment() {
 
     private lateinit var dialogSetDateOnListView: DialogSetDateListBinding
     private lateinit var dialogSetCardOnListView: DialogSetCardBinding
+    private lateinit var dialogItemInfo: DialogItemInfoBinding
 
     lateinit var db: MainDb
 
@@ -47,7 +44,7 @@ class AnaliticsFragment : Fragment() {
 
     private var getCardFromCalcList = "all"
 
-    private val adapter = ItemAdapter()
+    private val adapter = ItemAdapter(this)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -1429,7 +1426,7 @@ class AnaliticsFragment : Fragment() {
                             // 16.12.2023 13:35
                             val dateList = "${it1.data[8]}${it1.data[9]}." +
                                     "${it1.data[5]}${it1.data[6]}." +
-                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]}      " +
                                     "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
 
                             val item = ItemDataClass(iconCat,
@@ -1474,7 +1471,7 @@ class AnaliticsFragment : Fragment() {
                             // 16.12.2023 13:35
                             val dateList = "${it1.data[8]}${it1.data[9]}." +
                                     "${it1.data[5]}${it1.data[6]}." +
-                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]}      " +
                                     "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
 
                             val item = ItemDataClass(iconCat,
@@ -1562,7 +1559,7 @@ class AnaliticsFragment : Fragment() {
                             // 16.12.2023 13:35
                             val dateList = "${it1.data[8]}${it1.data[9]}." +
                                     "${it1.data[5]}${it1.data[6]}." +
-                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]}      " +
                                     "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
 
                             val item = ItemDataClass(iconCat,
@@ -1607,7 +1604,7 @@ class AnaliticsFragment : Fragment() {
                             // 16.12.2023 13:35
                             val dateList = "${it1.data[8]}${it1.data[9]}." +
                                     "${it1.data[5]}${it1.data[6]}." +
-                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]} " +
+                                    "${it1.data[0]}${it1.data[1]}${it1.data[2]}${it1.data[3]}      " +
                                     "${it1.data[11]}${it1.data[12]}${it1.data[13]}${it1.data[14]}${it1.data[15]}"
 
                             val item = ItemDataClass(iconCat,
@@ -1652,6 +1649,44 @@ class AnaliticsFragment : Fragment() {
 
         binding.textViewTotalSpendList.text = spendRes
 
+    }
+
+    private fun showDialogItemInfo(item: ItemDataClass) {
+
+        val buttonClick1 = AlphaAnimation(1f, 0.7f)
+        buttonClick1.duration = 160
+        buttonClick1.fillAfter = false
+        val buttonClick2 = AlphaAnimation(0.7f, 1f)
+        buttonClick2.duration = 50
+        buttonClick2.fillAfter = true
+        buttonClick2.startOffset = 70
+
+        dialogItemInfo = DialogItemInfoBinding.inflate(layoutInflater)
+        dialog = Dialog(this.activity!!)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setContentView(dialogItemInfo.root)
+        dialog.setCancelable(true)
+
+        dialogItemInfo.imageViewIconCat.setImageResource(item.iconCat)
+        dialogItemInfo.textViewCategory.text = item.categoryString
+        dialogItemInfo.textViewSpend.text = item.spend.toString()
+        dialogItemInfo.imageViewCard.setImageResource(item.cardIcon)
+        dialogItemInfo.textViewDate2.text = item.date
+        dialogItemInfo.textViewCatInfo.text = item.string
+
+        dialogItemInfo.dialogBtn.setOnClickListener {
+
+            dialog.dismiss()
+
+        }
+
+        hidingPanel(dialog)
+        dialog.show()
+
+    }
+
+    override fun onClick(item: ItemDataClass) {
+        showDialogItemInfo(item)
     }
 
 }

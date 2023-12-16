@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.wym_002.databinding.DataItemBinding
 
-class ItemAdapter: RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
+class ItemAdapter(val listener: Listener): RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
 
     private val itemList = ArrayList<ItemDataClass>()
 
@@ -15,7 +15,7 @@ class ItemAdapter: RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
 
         private val binding = DataItemBinding.bind(view)
 
-        fun bind(itemDataClass: ItemDataClass) = with(binding){
+        fun bind(itemDataClass: ItemDataClass, listener: Listener) = with(binding){
 
             imageViewCat.setImageResource(itemDataClass.iconCat)
 
@@ -33,6 +33,10 @@ class ItemAdapter: RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
 
             textViewSpend.text = itemDataClass.spend.toString()
 
+            itemView.setOnClickListener(){
+                listener.onClick(itemDataClass)
+            }
+
         }
 
     }
@@ -43,7 +47,7 @@ class ItemAdapter: RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
     }
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
-        holder.bind(itemList[position])
+        holder.bind(itemList[position], listener)
     }
 
     override fun getItemCount(): Int {
@@ -60,6 +64,12 @@ class ItemAdapter: RecyclerView.Adapter<ItemAdapter.ItemHolder>() {
     fun clearItemList(){
         itemList.clear()
         notifyDataSetChanged()
+    }
+
+    interface Listener {
+
+        fun onClick(item: ItemDataClass)
+
     }
 
 }
