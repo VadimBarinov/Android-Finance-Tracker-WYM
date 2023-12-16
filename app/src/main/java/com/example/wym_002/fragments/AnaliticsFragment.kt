@@ -12,6 +12,7 @@ import android.view.*
 import android.view.animation.AlphaAnimation
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.com.kotlinapp.OnSwipeTouchListener
 import com.example.wym_002.ItemAdapter
@@ -1574,6 +1575,8 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
         binding.rcView.layoutManager = LinearLayoutManager(this.activity!!)
         binding.rcView.adapter = adapter
+
+        binding.fasttrcv.attachRecyclerView(binding.rcView.findViewById(R.id.rcView))
 
         adapter.clearItemList()
 

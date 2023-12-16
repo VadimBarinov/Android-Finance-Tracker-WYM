@@ -37,6 +37,9 @@ android {
 }
 
 dependencies {
+
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'com.github.plusCubed:recycler-fast-scroll:0.3.2'
     // For Card view
     implementation 'androidx.cardview:cardview:1.0.0'
 
