@@ -42,16 +42,16 @@ interface Dao {
 
 
 
-    @Query("SELECT * FROM items ORDER BY data") // выводит все записи со всех карт
+    @Query("SELECT * FROM items ORDER BY data DESC") // выводит все записи со всех карт
     fun getAllItemsWithAllCards(): Flow<List<Items>>
 
-    @Query("SELECT * FROM items WHERE data BETWEEN :dateFrom AND :dateTo ORDER BY data") // выводит записи по выбранной дате со всех карт
+    @Query("SELECT * FROM items WHERE data BETWEEN :dateFrom AND :dateTo ORDER BY data DESC") // выводит записи по выбранной дате со всех карт
     fun getItemsByDateWithAllCards(dateFrom: String, dateTo: String): Flow<List<Items>>
 
-    @Query("SELECT * FROM items WHERE card = :selectedCard AND data BETWEEN :dateFrom AND :dateTo ORDER BY data") // выводит записи по выбранной дате с выбранной картой
+    @Query("SELECT * FROM items WHERE card = :selectedCard AND data BETWEEN :dateFrom AND :dateTo ORDER BY data DESC") // выводит записи по выбранной дате с выбранной картой
     fun getItemsByDateWithSelectedCard(dateFrom: String, dateTo: String, selectedCard: String): Flow<List<Items>>
 
-    @Query("SELECT * FROM items WHERE card = :selectedCard ORDER BY data") // выводит записи за все время с выбранной картой
+    @Query("SELECT * FROM items WHERE card = :selectedCard ORDER BY data DESC") // выводит записи за все время с выбранной картой
     fun getItemsByAllDateWithSelectedCard(selectedCard: String): Flow<List<Items>>
 
 
