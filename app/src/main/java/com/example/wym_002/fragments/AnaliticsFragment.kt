@@ -56,9 +56,9 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
         binding = FragmentAnaliticsFragmentBinding.inflate(layoutInflater)
 
-        db = MainDb.getDb(this.activity!!)
+        db = MainDb.getDb(this.requireActivity())
 
-        pref = context!!.getSharedPreferences("pref", Context.MODE_PRIVATE)
+        pref = requireContext().getSharedPreferences("pref", Context.MODE_PRIVATE)
         // resultCardBalance        key: R.drawable.credit_card_white.toString()
         // resultWalletBalance      key: R.drawable.wallet_white.toString()
         // resultBankBalance        key: R.drawable.account_balance_white.toString()
@@ -160,7 +160,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
         }
 
-        binding.constraintLayotDiagram.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {
+        binding.constraintLayotDiagram.setOnTouchListener(object : OnSwipeTouchListener(this.requireActivity()) {
             override fun onSwipeLeft() {
                 super.onSwipeLeft()
                 setCurrentMonthForward(calendar)
@@ -188,7 +188,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
         binding.imageViewBack.setOnClickListener{}
 
-        binding.constraintLayotDiagram.setOnTouchListener(object : OnSwipeTouchListener(this.activity!!) {})
+        binding.constraintLayotDiagram.setOnTouchListener(object : OnSwipeTouchListener(this.requireActivity()) {})
 
     }
 
@@ -220,7 +220,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
     private fun showDialogEnterDate() {
 
         dialogSetDate = DialogSetDateBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogSetDate.root)
         dialog.setCancelable(true)
@@ -312,7 +312,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
     private fun calcSetAnotherDiagram() {
 
         dialogSetDateDatepicker = DialogSetDateDatepickerBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogSetDateDatepicker.root)
         dialog.setCancelable(true)
@@ -608,7 +608,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
         val datePickerDialog = DatePickerDialog(
-            this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
+            this.requireActivity(), { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
                 selectedDate.set(year, monthOfYear, dayOfMonth)
                 selectedDate.set(Calendar.HOUR_OF_DAY, 0)
                 selectedDate.set(Calendar.MINUTE, 0)
@@ -638,7 +638,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
         val datePickerDialog = DatePickerDialog(
-            this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
+            this.requireActivity(), { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
                 selectedDate.set(year, monthOfYear, dayOfMonth)
                 selectedDate.set(Calendar.HOUR_OF_DAY, 23)
                 selectedDate.set(Calendar.MINUTE, 59)
@@ -968,7 +968,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
     private fun showDialogSetCardOnListView(dateFrom: String, dateTo: String) {
 
         dialogSetCardOnListView = DialogSetCardBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogSetCardOnListView.root)
         dialog.setCancelable(true)
@@ -1132,7 +1132,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
     private fun showDialogEnterDateOnListView() {
 
         dialogSetDateOnListView = DialogSetDateListBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogSetDateOnListView.root)
         dialog.setCancelable(true)
@@ -1240,7 +1240,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
     private fun calcSetAnotherList() {
 
         dialogSetDateDatepicker = DialogSetDateDatepickerBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogSetDateDatepicker.root)
         dialog.setCancelable(true)
@@ -1442,7 +1442,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
 
         buttonToSetCardOnListView(dateFrom, dateTo)
 
-        binding.rcView.layoutManager = LinearLayoutManager(this.activity!!)
+        binding.rcView.layoutManager = LinearLayoutManager(this.requireActivity())
         binding.rcView.adapter = adapter
 
         adapter.clearItemList()
@@ -1450,7 +1450,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         when (getCardFromCalcList != "all"){
             true -> {
                 db.getDao().getItemsByDateWithSelectedCard(dateFrom, dateTo, getCardFromCalcList)
-                    .asLiveData().observe(this.activity!!){
+                    .asLiveData().observe(this.requireActivity()){
 
                         it.forEach{ it1 ->
 
@@ -1495,7 +1495,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             }
             else ->{
                 db.getDao().getItemsByDateWithAllCards(dateFrom, dateTo)
-                    .asLiveData().observe(this.activity!!){
+                    .asLiveData().observe(this.requireActivity()){
 
                         it.forEach{ it1 ->
 
@@ -1573,7 +1573,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         buttonToSetCardOnListView("all", "all")
 
 
-        binding.rcView.layoutManager = LinearLayoutManager(this.activity!!)
+        binding.rcView.layoutManager = LinearLayoutManager(this.requireActivity())
         binding.rcView.adapter = adapter
 
         binding.fasttrcv.attachRecyclerView(binding.rcView.findViewById(R.id.rcView))
@@ -1583,7 +1583,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         when (getCardFromCalcList != "all"){
             true -> {
                 db.getDao().getItemsByAllDateWithSelectedCard(getCardFromCalcList)
-                    .asLiveData().observe(this.activity!!){
+                    .asLiveData().observe(this.requireActivity()){
 
                         it.forEach{ it1 ->
 
@@ -1628,7 +1628,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
             }
             else ->{
                 db.getDao().getAllItemsWithAllCards()
-                    .asLiveData().observe(this.activity!!){
+                    .asLiveData().observe(this.requireActivity()){
 
                         it.forEach{ it1 ->
 
@@ -1714,7 +1714,7 @@ class AnaliticsFragment : Fragment(), ItemAdapter.Listener {
         buttonClick2.startOffset = 70
 
         dialogItemInfo = DialogItemInfoBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogItemInfo.root)
         dialog.setCancelable(true)

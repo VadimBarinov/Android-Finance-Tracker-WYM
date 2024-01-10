@@ -44,9 +44,9 @@ class SettingsFragment : Fragment() {
 
         binding = FragmentSettingsFragmentBinding.inflate(layoutInflater)
 
-        db = MainDb.getDb(this.activity!!)
+        db = MainDb.getDb(this.requireActivity())
 
-        pref = context!!.getSharedPreferences("pref", Context.MODE_PRIVATE)
+        pref = requireContext().getSharedPreferences("pref", Context.MODE_PRIVATE)
         // resultCardBalance        key: R.drawable.credit_card_white.toString()
         // resultWalletBalance      key: R.drawable.wallet_white.toString()
         // resultBankBalance        key: R.drawable.account_balance_white.toString()
@@ -105,7 +105,7 @@ class SettingsFragment : Fragment() {
     private fun showDialogMyInfo() {
 
         dialogMyInfo = DialogInfoBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogMyInfo.root)
         dialog.setCancelable(true)
@@ -165,7 +165,7 @@ class SettingsFragment : Fragment() {
     private fun showDialogSetDate() {    // показывает диалоговое окно для выбора  даты
 
         dialogScrollDate = DialogScrollDateBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogScrollDate.root)
         dialog.setCancelable(true)
@@ -297,7 +297,7 @@ class SettingsFragment : Fragment() {
         buttonClick2.startOffset = 70
 
         dialogDelete = DialogDeleteBinding.inflate(layoutInflater)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(dialogDelete.root)
         dialog.setCancelable(true)
@@ -355,7 +355,7 @@ class SettingsFragment : Fragment() {
 
     private fun showToastMsg(string: String) {
 
-        val container = this.activity!!.findViewById<ViewGroup>(R.id.custom_toast_container)
+        val container = this.requireActivity().findViewById<ViewGroup>(R.id.custom_toast_container)
         val layout = layoutInflater.inflate(R.layout.custom_toast, container)
         val text: TextView = layout.findViewById(R.id.text)
         text.text = string
@@ -363,7 +363,7 @@ class SettingsFragment : Fragment() {
         if (toast != null){
             toast!!.cancel()
         }
-        toast = Toast(this.activity!!.applicationContext)
+        toast = Toast(this.requireActivity().applicationContext)
         toast!!.duration = Toast.LENGTH_SHORT
         toast!!.view = layout
         toast!!.show()

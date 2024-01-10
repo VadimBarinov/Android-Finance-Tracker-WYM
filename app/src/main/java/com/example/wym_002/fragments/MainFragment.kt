@@ -47,9 +47,9 @@ class MainFragment : Fragment() {
     ): View {
         binding = FragmentMainFragmentBinding.inflate(layoutInflater)
 
-        db = MainDb.getDb(this.activity!!)
+        db = MainDb.getDb(this.requireActivity())
 
-        pref = context!!.getSharedPreferences("pref", Context.MODE_PRIVATE)
+        pref = requireContext().getSharedPreferences("pref", Context.MODE_PRIVATE)
         // resultCardBalance        key: R.drawable.credit_card_white.toString()
         // resultWalletBalance      key: R.drawable.wallet_white.toString()
         // resultBankBalance        key: R.drawable.account_balance_white.toString()
@@ -207,7 +207,7 @@ class MainFragment : Fragment() {
 
     private fun showToastMsg(string: String) {
 
-        val container = this.activity!!.findViewById<ViewGroup>(R.id.custom_toast_container)
+        val container = this.requireActivity().findViewById<ViewGroup>(R.id.custom_toast_container)
         val layout = layoutInflater.inflate(R.layout.custom_toast, container)
         val text: TextView = layout.findViewById(R.id.text)
         text.text = string
@@ -215,7 +215,7 @@ class MainFragment : Fragment() {
         if (toast != null){
             toast!!.cancel()
         }
-        toast = Toast(this.activity!!.applicationContext)
+        toast = Toast(this.requireActivity().applicationContext)
         toast!!.duration = Toast.LENGTH_SHORT
         toast!!.view = layout
         toast!!.show()
@@ -224,7 +224,7 @@ class MainFragment : Fragment() {
 
     private fun showToastMsgRed(string: String) {
 
-        val container = this.activity!!.findViewById<ViewGroup>(R.id.custom_toast_container)
+        val container = this.requireActivity().findViewById<ViewGroup>(R.id.custom_toast_container)
         val layout = layoutInflater.inflate(R.layout.custom_toast_red, container)
         val text: TextView = layout.findViewById(R.id.text)
         text.text = string
@@ -232,7 +232,7 @@ class MainFragment : Fragment() {
         if (toast != null){
             toast!!.cancel()
         }
-        toast = Toast(this.activity!!.applicationContext)
+        toast = Toast(this.requireActivity().applicationContext)
         toast!!.duration = Toast.LENGTH_LONG
         toast!!.view = layout
         toast!!.show()
@@ -259,7 +259,7 @@ class MainFragment : Fragment() {
 
             }
 
-            dialog = Dialog(this.activity!!)
+            dialog = Dialog(this.requireActivity())
             dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             dialog.setContentView(customDialog.root)
             dialog.setCancelable(true)
@@ -457,10 +457,10 @@ class MainFragment : Fragment() {
         val calendar = Calendar.getInstance()
 
         val datePickerDialog = DatePickerDialog(
-            this.activity!!, { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
+            this.requireActivity(), { _, year: Int, monthOfYear: Int, dayOfMonth: Int ->
 
                 val timePickerDialog = TimePickerDialog(
-                    this.activity!!, { _, hourOfDay: Int, minute: Int ->
+                    this.requireActivity(), { _, hourOfDay: Int, minute: Int ->
                         selectedDate.set(year, monthOfYear, dayOfMonth, hourOfDay, minute)
                         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
                         val textDate = "Дата: ${dateFormat.format(selectedDate.time)}"
@@ -562,7 +562,7 @@ class MainFragment : Fragment() {
 
         customCashDialog = CustomCashDialogLayoutBinding.inflate(layoutInflater)
         customCashDialog.iconOnDialog.setImageResource(drawableIcon)
-        dialog = Dialog(this.activity!!)
+        dialog = Dialog(this.requireActivity())
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setContentView(customCashDialog.root)
         dialog.setCancelable(true)
