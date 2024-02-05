@@ -54,6 +54,7 @@ class MainFragment : Fragment() {
         // resultWalletBalance      key: R.drawable.wallet_white.toString()
         // resultBankBalance        key: R.drawable.account_balance_white.toString()
         //
+        //
         // progressBarMainProgress          key: mainProgress
         // progressBarMainMax               key: mainMax
         // progressBarMainColor               key: mainColor
