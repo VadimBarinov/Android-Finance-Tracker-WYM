@@ -3,6 +3,6 @@
 - В приложении можно добавлять траты в разные категории и анализировать их.
 - Используется база данных SQLite.
 
-![alt text](WYMScreenshots/1.png)
+![](WYMScreenshots/1.png)
 
-![alt text](WYMScreenshots/2.png)
+![](WYMScreenshots/2.png)
